@@ -28,27 +28,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JSP Engine (Tomcat Jasper) -->
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-jasper</artifactId>
-            <version>10.1.18</version>
-        </dependency>
-
-        <!-- Tomcat Core (recommended) -->
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-core</artifactId>
-            <version>10.1.18</version>
-        </dependency>
-
-        <!-- Tomcat EL (recommended for JSP/JSTL) -->
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-el</artifactId>
-            <version>10.1.18</version>
-        </dependency>
-
         <!-- JSTL API -->
         <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>
@@ -62,7 +41,7 @@
             <artifactId>jakarta.servlet.jsp.jstl</artifactId>
             <version>3.0.1</version>
         </dependency>
-        
+
     </dependencies>
 
     <!-- ===== Build Plugins ===== -->
@@ -89,7 +68,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Webapp Runner for Heroku (Runs WAR files on Heroku) -->
+            <!-- Webapp Runner for Heroku -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -109,7 +88,9 @@
                                     <destFileName>webapp-runner.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>
-                            <outputDirectory>${project.build.directory}/dependency</outputDirectory>
+                            <outputDirectory>
+                                ${project.build.directory}/dependency
+                            </outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
