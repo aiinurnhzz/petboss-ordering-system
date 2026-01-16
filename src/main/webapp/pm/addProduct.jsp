@@ -1,161 +1,31 @@
 <%@ page contentType="text/html; charset=UTF-8"%>
-<%@ page import="java.util.List"%>
-<%@ page import="com.petboss.model.Product"%>
+<%@ page session="true"%>
 
 <%
-List<Product> products = (List<Product>) request.getAttribute("products");
+String staffId = (String) session.getAttribute("staffId");
+String role = (String) session.getAttribute("role");
+
+if (staffId == null || role == null) {
+	response.sendRedirect(request.getContextPath() + "/login.jsp");
+	return;
+}
 %>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Products</title>
+<title>Add New Product</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet"
-	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
 html, body {
 	height: 100%;
 	margin: 0;
-	overflow: hidden;
 	background-color: #fdf8e9;
-}
-
-th {
-	background-color: #e6f4ea;
-	border: 1px solid #009a49;
-	font-weight: bold;
-}
-
-td {
-	border: 1px solid #009a49;
-	text-align: center;
-	font-size: 0.85rem;
-	padding: 8px;
-}
-
-.search-form {
-	display: flex;
-	gap: 16px;
-	margin-bottom: 24px;
-}
-
-.search-box {
-	position: relative;
-	flex: 1;
-}
-
-.search-input {
-	width: 100%;
-	border: 2px solid #009a49;
-	border-radius: 8px;
-	padding: 10px 42px 10px 16px;
-}
-
-.search-icon {
-	position: absolute;
-	right: 14px;
-	top: 50%;
-	transform: translateY(-50%);
-	color: #009a49;
-}
-
-.filter-box {
-	width: 220px;
-}
-
-.filter-container {
-	display: flex;
-	align-items: center;
-	border: 2px solid #009a49;
-	border-radius: 8px;
-	background: white;
-	position: relative;
-}
-
-.filter-icon {
-	padding: 0 14px;
-	border-right: 2px solid #009a49;
-	color: #009a49;
-}
-
-.filter-select {
-	width: 100%;
-	padding: 10px 40px 10px 14px;
-	appearance: none;
-	background: transparent;
-	cursor: pointer;
-}
-
-.filter-arrow {
-	position: absolute;
-	right: 14px;
-	pointer-events: none;
-	color: #6b7280;
-}
-
-input:disabled {
-	cursor: not-allowed;
-	background-color: #f3f4f6; /* light gray */
-	color: #374151;
-	border-color: #009a49;
-}
-
-/* ===== MODAL ACTION BUTTON GROUP ===== */
-.modal-actions {
-	display: flex;
-	justify-content: flex-end;
-	gap: 16px;
-	margin-top: 32px;
-}
-
-/* ===== COMMON BUTTON SIZE ===== */
-.modal-btn {
-	width: 140px;
-	height: 44px;
-	border-radius: 999px;
-	font-weight: 700;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: all 0.2s ease;
-}
-
-/* ===== CANCEL / CLOSE ===== */
-.btn-cancel {
-	background: #ef4444;
-	color: white;
-}
-
-.btn-cancel:hover {
-	background: #dc2626;
-	transform: scale(1.08);
-	box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
-}
-
-/* ===== SAVE ===== */
-.btn-save {
-	background: #16a34a;
-	color: white;
-}
-
-.btn-save:hover {
-	background: #15803d;
-	transform: scale(1.08);
-	box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
-}
-
-/* ===== MODAL SECTION TITLE (UNIFIED) ===== */
-.modal-section-title {
-	font-size: 0.95rem; /* same size everywhere */
-	font-weight: 700;
-	color: #15803d; /* green-700 */
-	margin-bottom: 1rem;
-	padding-bottom: 0.25rem;
-	border-bottom: 1px solid #bbf7d0; /* soft green divider */
 }
 </style>
 </head>
@@ -232,922 +102,269 @@ input:disabled {
 
 		</aside>
 
-		<!-- ===== MAIN ===== -->
+		<!-- ===== MAIN CONTENT ===== -->
 		<main class="flex-1 p-8 overflow-y-auto">
 
-			<div
-				class="bg-white border-2 border-[#009a49] rounded-2xl p-6 shadow">
+			<!-- ===== MAIN WHITE BOX ===== -->
+			<div class="border-2 border-green-600 rounded-lg p-6 bg-white">
 
-				<!-- TITLE ROW -->
-				<div class="flex justify-between items-center mb-4">
-					<h2 class="text-3xl font-black text-cyan-900">PRODUCT</h2>
+				<form action="<%=request.getContextPath()%>/pm/addProduct"
+					method="post" enctype="multipart/form-data"
+					class="flex flex-col h-full">
 
-					<a href="<%=request.getContextPath()%>/pm/addProduct"
-						class="bg-green-600 hover:bg-green-700
-                  text-white px-6 py-3 rounded-full font-semibold
-                  shadow-md transition">
-						+ Add Product </a>
-				</div>
+					<!-- ===== TITLE INSIDE SAME WHITE BOX ===== -->
+					<div class="flex items-center gap-4 mb-4">
 
-				<!-- DIVIDER -->
-				<hr class="border-green-600 mb-6">
+						<!-- BACK BUTTON -->
+						<a href="<%=request.getContextPath()%>/product"
+							class="text-green-700 text-2xl hover:text-green-900"> <i
+							class="fas fa-arrow-left"></i>
+						</a>
 
-				<!-- SEARCH + FILTER (SAME STYLE AS ORDER) -->
-				<!-- SEARCH -->
-				<form class="search-form">
-
-					<div class="search-box">
-						<input type="text" id="searchInput"
-							placeholder="Search Supplier by ID, Name or Email"
-							class="search-input"> <i
-							class="fas fa-search search-icon"></i>
+						<!-- TITLE -->
+						<h2 class="text-3xl font-black text-cyan-900">ADD NEW PRODUCT
+						</h2>
 					</div>
 
-					<!-- FILTER -->
-					<div class="filter-box">
-						<div class="filter-container">
+					<!-- GREEN DIVIDER -->
+					<hr class="border-green-600 mb-6">
 
-							<div class="filter-icon">
-								<i class="fas fa-filter"></i>
-							</div>
+					<!-- ===== FORM CONTENT ===== -->
+					<div class="grid grid-cols-2 gap-6">
 
-							<select id="categoryFilter" class="filter-select">
-								<option value="">All Category</option>
+						<!-- ===== LEFT PANEL ===== -->
+						<div class="border border-green-600 rounded-lg p-4 bg-green-50">
+
+							<label class="block font-semibold mb-1">Category</label> <select
+								name="category" id="category"
+								class="w-full border rounded px-3 py-2 mb-3"
+								onchange="showForm()" required>
+
+								<option value="">Select category</option>
 								<option value="PET_FOOD">Pet Food</option>
 								<option value="PET_MEDICINE">Pet Medicine</option>
 								<option value="PET_CARE">Pet Care</option>
 								<option value="PET_ACCESSORY">Pet Accessory</option>
-							</select> <i class="fas fa-caret-down filter-arrow"></i>
+
+							</select> <label class="block font-semibold mb-1">Product Preview</label>
+							<label for="productImage"
+								class="border border-dashed border-green-600 h-40
+							              flex flex-col items-center justify-center
+							              text-gray-400 mb-3 cursor-pointer
+							              hover:bg-green-100 rounded-lg relative">
+
+								<div id="uploadPlaceholder" class="flex flex-col items-center">
+									<i class="fas fa-image text-3xl mb-2"></i> <span>+ Add
+										Image</span>
+								</div> <img id="preview"
+								class="hidden absolute inset-0
+							                w-full h-full object-contain p-3 rounded-lg" />
+							</label> <input type="file" name="productImage" id="productImage"
+								accept="image/*" class="hidden" onchange="previewImage(event)">
+
+							<label class="block font-semibold mb-1">Product Name</label> <input
+								type="text" name="productName"
+								class="w-full border rounded px-3 py-2 mb-2" required> <label
+								class="block font-semibold mb-1">Product Brand</label> <input
+								type="text" name="productBrand"
+								class="w-full border rounded px-3 py-2 mb-2"> <label
+								class="block font-semibold mb-1"> SKU / Code / ID </label>
+
+							<div class="relative mt-1 group">
+
+								<!-- INPUT -->
+								<input type="text" value="AUTO GENERATED" readonly
+									class="w-full border border-gray-400 rounded-lg
+							                  px-3 py-2 text-sm bg-gray-200 pr-12
+							                  cursor-not-allowed">
+								<!-- TOOLTIP -->
+								<div
+									class="absolute right-0 -top-9
+							               hidden group-hover:block
+							               bg-black text-white text-xs
+							               px-3 py-1 rounded shadow-lg
+							               whitespace-nowrap z-50">
+									Auto Generated</div>
+							</div>
+						</div>
+						<!-- ===== RIGHT PANEL ===== -->
+						<div>
+							<h3 class="text-green-700 font-bold mb-2">Stock Details</h3>
+							<div class="grid grid-cols-2 gap-4 mb-6">
+								<div>
+									<label class="text-sm font-semibold text-gray-700">
+										Current Quantity </label> <input type="number" name="quantity"
+										class="w-full border rounded px-3 py-2"
+										placeholder="Enter quantity" required>
+								</div>
+
+								<div>
+									<label class="text-sm font-semibold text-gray-700">
+										Minimum Quantity </label> <input type="number" name="minQuantity"
+										class="w-full border rounded px-3 py-2"
+										placeholder="Enter minimum quantity" required>
+								</div>
+							</div>
+
+
+							<h3 class="text-green-700 font-bold mb-2">Pricing</h3>
+							<div class="grid grid-cols-2 gap-4 mb-6">
+								<div>
+									<label class="text-sm font-semibold text-gray-700">
+										Purchase Price (RM) </label> <input type="number" step="0.01"
+										name="purchasePrice" class="w-full border rounded px-3 py-2"
+										placeholder="Enter purchase price" required>
+								</div>
+
+								<div>
+									<label class="text-sm font-semibold text-gray-700">
+										Selling Price (RM) </label> <input type="number" step="0.01"
+										name="sellingPrice" class="w-full border rounded px-3 py-2"
+										placeholder="Enter selling price" required>
+								</div>
+							</div>
+
+
+							<!-- ===== CATEGORY-SPECIFIC FIELDS ===== -->
+
+							<!-- PET FOOD -->
+							<div id="food" class="hidden min-h-[230px]">
+								<label class="text-sm font-semibold text-gray-700">Weight</label>
+								<input type="text" name="weight"
+									class="border rounded px-3 py-2 w-full mb-3"
+									placeholder="e.g. 15 kg"> <label
+									class="text-sm font-semibold text-gray-700">Expiry Date</label>
+								<input type="date" name="expiryDate_food"
+									class="border rounded px-3 py-2 w-full mb-3">
+							</div>
+
+							<!-- PET MEDICINE -->
+							<div id="medicine" class="hidden min-h-[230px]">
+								<label class="text-sm font-semibold text-gray-700">Dosage</label>
+								<input type="text" name="dosage"
+									class="border rounded px-3 py-2 w-full mb-2"
+									placeholder="e.g. 1 tablet per 20–40kg"> <label
+									class="text-sm font-semibold text-gray-700">Prescription</label>
+								<input type="text" name="prescription"
+									class="border rounded px-3 py-2 w-full mb-2"
+									placeholder="Yes / No"> <label
+									class="text-sm font-semibold text-gray-700">Expiry Date</label>
+								<input type="date" name="expiryDate_medicine"
+									class="border rounded px-3 py-2 w-full mb-3">
+							</div>
+
+							<!-- PET CARE -->
+							<div id="care" class="hidden min-h-[230px]">
+								<label class="text-sm font-semibold text-gray-700">Type</label>
+								<select name="type_care"
+									class="border rounded px-3 py-2 w-full mb-2">
+									<option value="">Select Type</option>
+									<option value="Lotion">Lotion</option>
+									<option value="Balm">Balm</option>
+									<option value="Spray">Spray</option>
+								</select> <label class="text-sm font-semibold text-gray-700">Expiry
+									Date</label> <input type="date" name="expiryDate_care"
+									class="border rounded px-3 py-2 w-full mb-3">
+							</div>
+
+							<!-- PET ACCESSORY -->
+							<div id="accessory" class="hidden min-h-[230px]">
+								<label class="text-sm font-semibold text-gray-700">Type</label>
+								<select name="type_accessory"
+									class="border rounded px-3 py-2 w-full mb-2">
+									<option value="">Select Type</option>
+									<option value="Toy">Toy</option>
+									<option value="Bowl">Bowl</option>
+									<option value="Collar">Collar</option>
+									<option value="Cage">Cage</option>
+								</select> <label class="text-sm font-semibold text-gray-700">Material</label>
+								<input type="text" name="material"
+									class="border rounded px-3 py-2 w-full mb-3"
+									placeholder="e.g. Plastic, Rubber, Steel">
+							</div>
+
+							<!-- ===== BUTTONS (FIXED AT BOTTOM) ===== -->
+							<div class="flex justify-end gap-4 mt-auto pt-6">
+
+								<!-- CANCEL -->
+								<a href="<%=request.getContextPath()%>/product"
+									class="w-32 h-11 flex items-center justify-center
+              bg-gray-500 text-white rounded-full font-bold
+              transition-all duration-200
+              hover:bg-gray-600 hover:shadow-md hover:-translate-y-0.5
+              active:translate-y-0">
+									Cancel </a>
+
+								<!-- SAVE -->
+								<button type="submit"
+									class="w-32 h-11 bg-green-600 text-white
+                   rounded-full font-bold
+                   transition-all duration-200
+                   hover:bg-green-700 hover:shadow-md hover:-translate-y-0.5
+                   active:translate-y-0">
+									Save</button>
+
+							</div>
+
 						</div>
 					</div>
-
 				</form>
-
-				<!-- TABLE -->
-				<div class="overflow-x-hidden">
-					<table class="w-full border-collapse">
-						<thead>
-							<tr>
-								<th class="border p-2">Image</th>
-								<th class="border p-2">Product ID</th>
-								<th class="border p-2">Name</th>
-								<th class="border p-2">Quantity</th>
-								<th class="border p-2">Category</th>
-								<th class="border p-2">Selling Price (RM)</th>
-								<th class="border p-2">Action</th>
-							</tr>
-						</thead>
-
-						<tbody>
-							<%
-							if (products != null && !products.isEmpty()) {
-								for (Product p : products) {
-							%>
-
-							<tr class="product-row">
-
-								<!-- IMAGE -->
-								<td class="border p-2 text-center">
-									<%
-									if (p.getImage() != null) {
-									%> <img
-									src="<%=request.getContextPath()%>/product-image?file=<%=p.getImage()%>"
-									class="h-10 mx-auto"> <%
- } else {
- %> — <%
- }
- %>
-								</td>
-
-								<td class="border p-2"><%=p.getProductId()%></td>
-								<td class="border p-2 text-center"><%=p.getName()%></td>
-
-								<td class="border p-2 text-center font-semibold"><%=p.getQuantity()%>
-								</td>
-
-								<td class="border p-2"><%=p.getCategory()%></td>
-
-								<td class="border p-2 text-center">RM <%=String.format("%.2f", p.getSellingPrice())%>
-								</td>
-
-								<!-- ACTION -->
-								<td class="border p-2 text-center">
-									<div class="flex justify-center items-center gap-4">
-
-										<!-- VIEW -->
-										<div class="relative group">
-											<i
-												class="fas fa-eye text-black text-lg hover:scale-150 transition cursor-pointer"
-												onclick="openViewModal(
-                       '<%=p.getProductId()%>',
-                       '<%=p.getName()%>',
-                       '<%=p.getCategory()%>',
-                       '<%=p.getBrand()%>',
-                       <%=p.getQuantity()%>,
-                       <%=p.getMinQuantity()%>,
-                       <%=p.getPurchasePrice()%>,
-                       <%=p.getSellingPrice()%>,
-                       '<%=p.getImage()%>'
-                   )"></i>
-
-											<span
-												class="absolute bottom-full mb-2 hidden group-hover:block
-                             bg-black text-white text-[10px] px-2 py-1 rounded">
-												View </span>
-										</div>
-
-										<!-- EDIT -->
-										<div class="relative group">
-											<i
-												class="fas fa-pencil-alt text-black text-lg hover:scale-150 transition cursor-pointer"
-												onclick="openEditModal(
-                       '<%=p.getProductId()%>',
-                       '<%=p.getName()%>',
-                       '<%=p.getCategory()%>',
-                       '<%=p.getBrand()%>',
-                       <%=p.getQuantity()%>,
-                       <%=p.getMinQuantity()%>,
-                       <%=p.getPurchasePrice()%>,
-                       <%=p.getSellingPrice()%>,
-                       '<%=p.getImage()%>'
-                   )"></i>
-
-											<span
-												class="absolute bottom-full mb-2 hidden group-hover:block
-                             bg-black text-white text-[10px] px-2 py-1 rounded">
-												Update </span>
-										</div>
-
-									</div>
-								</td>
-
-							</tr>
-
-							<%
-							}
-							} else {
-							%>
-							<tr>
-								<td colspan="7" class="p-6 text-center text-gray-500 italic">
-									No products available</td>
-							</tr>
-							<%
-							}
-							%>
-
-						</tbody>
-					</table>
-				</div>
-
 			</div>
 		</main>
 	</div>
-
-	<!-- ===== VIEW PRODUCT MODAL ===== -->
-	<div id="viewModal"
-		class="fixed inset-0 bg-black bg-opacity-50 z-[110] hidden
-            flex items-center justify-center p-4">
-
-		<div
-			class="bg-white w-full max-w-5xl rounded-3xl
-           border-2 border-[#009a49] shadow-2xl
-           overflow-hidden flex flex-col md:flex-row">
-
-
-			<!-- ===== LEFT : PRODUCT PREVIEW ===== -->
-			<div class="w-full md:w-1/3 bg-white p-6 border-r border-gray-200">
-				<div
-					class="border-2 border-[#009a49] rounded-xl p-4 h-full flex flex-col">
-
-					<h3
-						class="text-lg font-bold text-green-700 mb-4 border-b border-green-200 pb-1">PRODUCT
-						PREVIEW</h3>
-
-					<div
-						class="w-full aspect-square bg-white rounded-lg mb-4
-                        flex items-center justify-center overflow-hidden
-                        border border-gray-100">
-						<img id="viewImg" class="max-w-full max-h-full object-contain">
-					</div>
-
-					<div class="space-y-3 flex-grow">
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Product Name </label> <input id="viewName"
-								class="w-full text-xs border border-[#009a49]
-                                  rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Category </label> <input id="viewCategory"
-								class="w-full text-xs border border-[#009a49]
-                                  rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Product Brand </label> <input id="viewBrand"
-								class="w-full text-xs border border-[#009a49]
-                                  rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								SKU / Code / ID </label> <input id="viewId"
-								class="w-full text-xs border border-[#009a49]
-                                  rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- ===== RIGHT : DETAILS ===== -->
-			<div class="w-full md:w-2/3 p-8 flex flex-col h-full bg-gray-50">
-
-				<div class="flex-grow space-y-8">
-
-					<!-- STOCK -->
-					<div
-						class="bg-white rounded-2xl p-6 shadow-sm border border-green-100">
-						<h4
-							class="text-lg font-bold text-green-700 mb-4 border-b border-green-200 pb-1">
-							STOCK DETAILS</h4>
-
-
-						<div class="grid grid-cols-2 gap-6">
-
-							<div>
-								<label class="text-xs font-bold text-gray-600"> Current
-									Quantity </label> <input id="viewQty"
-									class="w-full border border-[#009a49]
-                                      rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-
-							<div>
-								<label class="text-xs font-bold text-gray-600"> Minimum
-									Quantity </label> <input id="viewMin"
-									class="w-full border border-[#009a49]
-                                      rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-						</div>
-					</div>
-
-					<!-- PRICING -->
-					<div
-						class="bg-white rounded-2xl p-6 shadow-sm border border-green-100">
-						<h4
-							class="text-lg font-bold text-green-700 mb-4 border-b border-green-200 pb-1">
-							PRICING</h4>
-
-
-
-						<div class="grid grid-cols-2 gap-x-12 gap-y-4">
-							<div>
-								<label class="text-xs font-bold text-gray-600"> Purchase
-									Price (RM) </label> <input id="viewBuy"
-									class="w-full border border-[#009a49]
-                                      rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-
-							<div>
-								<label class="text-xs font-bold text-gray-600"> Selling
-									Price (RM) </label> <input id="viewSell"
-									class="w-full border border-[#009a49]
-                                      rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-						</div>
-					</div>
-
-					<!-- CATEGORY DETAILS -->
-					<div id="viewCategorySection"
-						class="mt-10 hidden bg-white rounded-2xl p-6
-            border border-dashed border-green-300">
-
-						<h4
-							class="text-green-700 font-bold mb-4
-			               border-b border-green-200 pb-1">
-							CATEGORY DETAILS</h4>
-
-						<!-- PET MEDICINE -->
-						<div id="view-cat-medicine"
-							class="hidden grid grid-cols-2 gap-x-12 gap-y-4">
-
-							<div>
-								<label class="text-xs font-bold text-gray-600">Dosage</label> <input
-									id="viewMedDosage"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-
-							<div>
-								<label class="text-xs font-bold text-gray-600">Expiry
-									Date</label> <input id="viewMedExpiry"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-
-							<div class="col-span-2">
-								<label class="text-xs font-bold text-gray-600">Prescription</label>
-								<input id="viewMedPrescription"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-						</div>
-
-						<!-- PET FOOD -->
-						<div id="view-cat-food"
-							class="hidden grid grid-cols-2 gap-x-12 gap-y-4">
-							<div>
-								<label class="text-xs font-bold text-gray-600">Weight</label> <input
-									id="viewFoodWeight"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-							<div>
-								<label class="text-xs font-bold text-gray-600">Expiry
-									Date</label> <input id="viewFoodExpiry"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-						</div>
-
-						<!-- PET CARE -->
-						<div id="view-cat-care"
-							class="hidden grid grid-cols-2 gap-x-12 gap-y-4">
-							<div>
-								<label class="text-xs font-bold text-gray-600">Type</label> <input
-									id="viewCareType"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-							<div>
-								<label class="text-xs font-bold text-gray-600">Expiry
-									Date</label> <input id="viewCareExpiry"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-						</div>
-
-						<!-- PET ACCESSORY -->
-						<div id="view-cat-accessory" class="hidden">
-							<label class="text-xs font-bold text-gray-600">Material</label> <input
-								id="viewAccMaterial"
-								class="w-full border border-[#009a49]
-			                      rounded-lg px-3 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-					</div>
-				</div>
-
-				<!-- ===== ACTION ===== -->
-				<div class="modal-actions">
-					<button type="button" onclick="closeViewModal()"
-						class="modal-btn btn-cancel">Close</button>
-				</div>
-
-			</div>
-
-		</div>
-	</div>
-
-	<!-- ===== EDIT PRODUCT MODAL ===== -->
-	<div id="editModal"
-		class="fixed inset-0 bg-black bg-opacity-50 z-[110] hidden
-		            flex items-center justify-center p-4">
-
-		<form action="<%=request.getContextPath()%>/editProduct" method="post"
-			enctype="multipart/form-data"
-			class="bg-white w-full max-w-5xl rounded-3xl
-             border-2 border-[#009a49] shadow-2xl
-             overflow-hidden flex flex-col md:flex-row">
-
-
-			<!-- 🔑 REQUIRED -->
-			<input type="hidden" name="productId" id="editIDHidden"> <input
-				type="hidden" name="category" id="editCategoryHidden">
-
-			<!-- LEFT : PRODUCT PREVIEW -->
-			<div class="w-full md:w-1/3 bg-white p-6 border-r border-gray-200">
-
-				<!-- GREEN FRAME (MATCH VIEW EXACTLY) -->
-				<div
-					class="border-2 border-[#009a49] rounded-xl p-4 h-full flex flex-col">
-
-					<h3
-						class="text-lg font-bold text-green-700 mb-4 border-b border-green-200 pb-1">
-						PRODUCT PREVIEW</h3>
-
-					<div
-						class="w-full aspect-square bg-gray-50 rounded-lg mb-4
-                   flex items-center justify-center overflow-hidden
-                   border border-gray-100">
-						<img id="editImg" class="max-w-full max-h-full object-contain">
-					</div>
-
-					<!-- IMAGE UPLOAD -->
-					<div class="mb-4">
-						<label class="text-xs font-bold text-gray-600"> CHANGE
-							PRODUCT IMAGE </label> <input type="file" name="productImage"
-							accept="image/*" onchange="previewEditImage(this)"
-							class="w-full border border-[#009a49]
-                          rounded-lg px-3 py-1.5 text-xs">
-					</div>
-
-					<!-- INFO -->
-					<div class="space-y-3 flex-grow">
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Product Name </label> <input id="editName"
-								class="w-full text-xs border border-[#009a49]
-                              rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Category </label> <input id="editCategory"
-								class="w-full text-xs border border-[#009a49]
-                              rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Brand </label> <input id="editBrand"
-								class="w-full text-xs border border-[#009a49]
-                              rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Product ID </label> <input id="editID"
-								class="w-full text-xs border border-[#009a49]
-                              rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-					</div>
-
-				</div>
-			</div>
-
-			<!-- RIGHT : EDIT DETAILS -->
-			<div class="w-full md:w-2/3 p-8 flex flex-col bg-gray-50">
-
-
-				<!-- CONTENT STACK -->
-				<div class="flex-grow space-y-8">
-
-					<!-- STOCK DETAILS -->
-					<div
-						class="bg-white rounded-2xl p-6 shadow-sm border border-green-100">
-						<h4 class="modal-section-title">STOCK DETAILS</h4>
-
-						<div class="grid grid-cols-2 gap-6">
-							<div>
-								<label class="block text-xs font-semibold text-gray-600 mb-1">
-									Current Quantity </label> <input type="number" name="quantity"
-									id="editQty"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-2">
-							</div>
-
-							<div>
-								<label class="block text-xs font-semibold text-gray-600 mb-1">
-									Minimum Quantity </label> <input type="number" name="minQuantity"
-									id="editMin"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-2">
-							</div>
-						</div>
-					</div>
-
-					<!-- PRICING -->
-					<div
-						class="bg-white rounded-2xl p-6 shadow-sm border border-green-100">
-						<h4 class="modal-section-title">PRICING</h4>
-
-						<div class="grid grid-cols-2 gap-6">
-							<div>
-								<label class="block text-xs font-semibold text-gray-600 mb-1">
-									Purchase Price (RM) </label> <input type="number" step="0.01"
-									name="purchasePrice" id="editBuy"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-2">
-							</div>
-
-							<div>
-								<label class="block text-xs font-semibold text-gray-600 mb-1">
-									Selling Price (RM) </label> <input type="number" step="0.01"
-									name="sellingPrice" id="editSell"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-2">
-							</div>
-						</div>
-					</div>
-
-					<!-- CATEGORY DETAILS -->
-					<div id="editCategorySection"
-						class="hidden bg-white rounded-2xl p-6 border border-dashed border-green-300">
-						<h4 class="modal-section-title">CATEGORY DETAILS</h4>
-
-						<!-- PET MEDICINE -->
-						<div id="edit-cat-medicine"
-							class="hidden grid grid-cols-2 gap-x-12 gap-y-4">
-							<div>
-								<label class="text-xs font-bold text-gray-600">Dosage</label> <input
-									name="dosage" id="editMedDosage"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-
-							<div>
-								<label class="text-xs font-bold text-gray-600">Expiry
-									Date</label> <input type="date" name="expiryDate" id="editMedExpiry"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-
-							<div class="col-span-2">
-								<label class="text-xs font-bold text-gray-600">Prescription</label>
-								<input name="prescription" id="editMedPrescription"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-						</div>
-
-						<!-- PET FOOD -->
-						<div id="edit-cat-food"
-							class="hidden grid grid-cols-2 gap-x-12 gap-y-4">
-							<div>
-								<label class="text-xs font-bold text-gray-600">Weight</label> <input
-									name="weight" id="editFoodWeight"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-
-							<div>
-								<label class="text-xs font-bold text-gray-600">Expiry
-									Date</label> <input type="date" name="expiryDate" id="editFoodExpiry"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-						</div>
-
-						<!-- PET CARE -->
-						<div id="edit-cat-care"
-							class="hidden grid grid-cols-2 gap-x-12 gap-y-4">
-							<div>
-								<label class="text-xs font-bold text-gray-600">Type</label> <input
-									name="type" id="editCareType"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-
-							<div>
-								<label class="text-xs font-bold text-gray-600">Expiry
-									Date</label> <input type="date" name="expiryDate" id="editCareExpiry"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-						</div>
-
-						<!-- PET ACCESSORY -->
-						<div id="edit-cat-accessory" class="hidden">
-							<label class="text-xs font-bold text-gray-600">Material</label> <input
-								name="material" id="editAccMaterial"
-								class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-						</div>
-					</div>
-
-				</div>
-
-				<!-- ACTION BUTTONS -->
-				<div class="modal-actions">
-					<button type="button" onclick="closeEditModal()"
-						class="modal-btn btn-cancel">Cancel</button>
-
-					<button type="submit" class="modal-btn btn-save">Save</button>
-				</div>
-
-			</div>
-			<!-- CLOSE RIGHT PANEL -->
-
-		</form>
-		<!-- 🔥 CLOSE FORM PROPERLY -->
-
-	</div>
-	<!-- CLOSE editModal -->
-
-
-
 	<script>
-/* ===== VIEW ===== */
-function openViewModal(id, name, cat, brand, qty, min, buy, sell, img) {
-
-    // BASIC INFO
-    document.getElementById("viewId").value = id;
-    document.getElementById("viewName").value = name;
-    document.getElementById("viewCategory").value = cat;
-    document.getElementById("viewBrand").value = brand;
-    document.getElementById("viewQty").value = qty;
-    document.getElementById("viewMin").value = min;
-    document.getElementById("viewBuy").value = buy;
-    document.getElementById("viewSell").value = sell;
-
-    document.getElementById("viewImg").src = img
-        ? "<%=request.getContextPath()%>/product-image?file=" + img
-        : "<%=request.getContextPath()%>/images/default-product.png";
-
-    document.getElementById("viewModal").classList.remove("hidden");
-
-    // ✅ AUTO LOAD CATEGORY
-    loadCategoryDetails(id, cat);
-}
-
-
-function loadCategoryDetails(productId, category) {
-
-    fetch(
-        "<%=request.getContextPath()%>/product-category" +
-        "?productId=" + productId +
-        "&category=" + category
-    )
-    .then(res => res.json())
-    .then(data => {
-
-        // HIDE ALL
-        document.getElementById("viewCategorySection").classList.add("hidden");
-
-        document.querySelectorAll(
-            "#view-cat-medicine, #view-cat-food, #view-cat-care, #view-cat-accessory"
-        ).forEach(div => div.classList.add("hidden"));
-
-        if (!data || Object.keys(data).length === 0) return;
-
-        document.getElementById("viewCategorySection").classList.remove("hidden");
-
-        // PET MEDICINE
-        if (category === "PET_MEDICINE") {
-            document.getElementById("viewMedDosage").value = data.dosage || "-";
-            document.getElementById("viewMedPrescription").value = data.prescription || "-";
-            document.getElementById("viewMedExpiry").value = formatDate(data.expiry_date);
-            document.getElementById("view-cat-medicine").classList.remove("hidden");
-        }
-
-        // PET FOOD
-        if (category === "PET_FOOD") {
-            document.getElementById("viewFoodWeight").value = data.weight || "-";
-            document.getElementById("viewFoodExpiry").value = formatDate(data.expiry_date);
-            document.getElementById("view-cat-food").classList.remove("hidden");
-        }
-
-        // PET CARE
-        if (category === "PET_CARE") {
-            document.getElementById("viewCareType").value = data.type || "-";
-            document.getElementById("viewCareExpiry").value = formatDate(data.expiry_date);
-            document.getElementById("view-cat-care").classList.remove("hidden");
-        }
-
-        // PET ACCESSORY
-        if (category === "PET_ACCESSORY") {
-            document.getElementById("viewAccMaterial").value = data.material || "-";
-            document.getElementById("view-cat-accessory").classList.remove("hidden");
-        }
-    })
-    .catch(err => console.error("CATEGORY LOAD ERROR:", err));
-}
-
-
-function formatDate(dateStr) {
-    if (!dateStr) return "-";
-    return dateStr.split(" ")[0]; // YYYY-MM-DD
-}
-
-function closeViewModal(){
-    document.getElementById("viewModal").classList.add("hidden");
-}
-
-/* ===== EDIT ===== */
-function openEditModal(id, name, cat, brand, qty, min, buy, sell, img) {
-
-    document.getElementById("editID").value = id;
-    document.getElementById("editIDHidden").value = id;
-
-    document.getElementById("editCategory").value = cat;
-    document.getElementById("editCategoryHidden").value = cat; // 🔥 IMPORTANT
-
-    document.getElementById("editName").value = name;
-    document.getElementById("editBrand").value = brand;
-
-    document.getElementById("editQty").value = qty;
-    document.getElementById("editMin").value = min;
-    document.getElementById("editBuy").value = buy;
-    document.getElementById("editSell").value = sell;
-
-    document.getElementById("editImg").src = img
-        ? "<%=request.getContextPath()%>/product-image?file=" + img
-        : "<%=request.getContextPath()%>/images/default-product.png";
-
-    document.getElementById("editModal").classList.remove("hidden");
-
-    loadCategoryDetailsEdit(id, cat);
-}
-
-function loadCategoryDetailsEdit(productId, category) {
-
-    fetch(
-        "<%=request.getContextPath()%>/product-category" +
-        "?productId=" + productId +
-        "&category=" + category
-    )
-    .then(res => res.json())
-    .then(data => {
-
-        // hide all
-        document.getElementById("editCategorySection").classList.add("hidden");
-
-        document.querySelectorAll(
-            "#edit-cat-medicine, #edit-cat-food, #edit-cat-care, #edit-cat-accessory"
-        ).forEach(div => div.classList.add("hidden"));
-
-        if (!data || Object.keys(data).length === 0) return;
-
-        document.getElementById("editCategorySection").classList.remove("hidden");
-
-        // PET MEDICINE
-        if (category === "PET_MEDICINE") {
-            document.getElementById("editMedDosage").value = data.dosage || "";
-            document.getElementById("editMedPrescription").value = data.prescription || "";
-            document.getElementById("editMedExpiry").value = toDate(data.expiry_date);
-            document.getElementById("edit-cat-medicine").classList.remove("hidden");
-        }
-
-        // PET FOOD
-        if (category === "PET_FOOD") {
-            document.getElementById("editFoodWeight").value = data.weight || "";
-            document.getElementById("editFoodExpiry").value = toDate(data.expiry_date);
-            document.getElementById("edit-cat-food").classList.remove("hidden");
-        }
-
-        // PET CARE
-        if (category === "PET_CARE") {
-            document.getElementById("editCareType").value = data.type || "";
-            document.getElementById("editCareExpiry").value = toDate(data.expiry_date);
-            document.getElementById("edit-cat-care").classList.remove("hidden");
-        }
-
-        // PET ACCESSORY
-        if (category === "PET_ACCESSORY") {
-            document.getElementById("editAccMaterial").value = data.material || "";
-            document.getElementById("edit-cat-accessory").classList.remove("hidden");
-        }
-    });
-}
-
-
-function toDate(dateStr) {
-    if (!dateStr) return "";
-    return dateStr.split(" ")[0]; // YYYY-MM-DD
-}
-
-/* ===============================
-   SEARCH + FILTER (AJAX)
-   =============================== */
-
-const searchInput = document.getElementById("searchInput");
-const categoryFilter = document.getElementById("categoryFilter");
-const tableBody = document.querySelector("tbody");
-
-let typingTimer;
-const contextPath = "<%=request.getContextPath()%>";
-
-function loadProducts() {
-
-    const keyword = searchInput.value || "";
-    const category = categoryFilter.value || "";
-
-    fetch(
-        contextPath + "/product?ajax=true"
-        + "&keyword=" + encodeURIComponent(keyword)
-        + "&category=" + encodeURIComponent(category)
-    )
-    .then(res => res.json())
-    .then(data => {
-
-        tableBody.innerHTML = "";
-
-        if (!data || data.length === 0) {
-            tableBody.innerHTML =
-                "<tr>" +
-                    "<td colspan='9' class='text-center text-gray-500 p-4'>" +
-                        "No product found" +
-                    "</td>" +
-                "</tr>";
-            return;
-        }
-
-        data.forEach(p => {
-
-            /* ===== IMAGE ===== */
-            let imgHtml = "-";
-            if (p.img) {
-                imgHtml =
-                    "<img src='" + contextPath +
-                    "/product-image?file=" + p.img +
-                    "' class='h-10 mx-auto'>";
-            }
-
-            /* ===== ROW (MATCH TABLE HEADER ORDER) ===== */
-		const row =
-		    "<tr class='border border-green-600'>" +
-		        "<td class='border p-2 text-center'>" + imgHtml + "</td>" +
-		        "<td class='border p-2'>" + p.id + "</td>" +
-		        "<td class='border p-2 text-center'>" + p.name + "</td>" +
-		        "<td class='border p-2'>" + p.qty + "</td>" +
-		        "<td class='border p-2'>" + p.category + "</td>" +
-		        "<td class='border p-2 text-center'>RM " + Number(p.sell).toFixed(2) + "</td>"
-		        "<td class='border p-2 text-center'>" +
-		            "<div class='flex justify-center items-center gap-4'>" +
-		                "<div class='relative group'>" +
-		                    "<i class='fas fa-eye text-black hover:scale-150 transition text-lg cursor-pointer' " +
-		                    "onclick=\"openViewModal('" +
-		                        p.id + "','" +
-		                        p.name + "','" +
-		                        p.category + "','" +
-		                        p.brand + "','" +
-		                        p.qty + "','" +
-		                        (p.min || 0) + "','" +
-		                        p.buy + "','" +
-		                        p.sell + "','" +
-		                        (p.img || '') +
-		                    "')\"></i>" +
-		                    "<span class='absolute bottom-full left-1/2 -translate-x-1/2 mb-2 " +
-		                          "hidden group-hover:block bg-black text-white text-[10px] " +
-		                          "py-1 px-2 rounded shadow-lg whitespace-nowrap z-50'>" +
-		                          "View</span>" +
-		                "</div>" +
-		                "<div class='relative group'>" +
-		                    "<i class='fas fa-pencil-alt text-black hover:scale-150 transition text-lg cursor-pointer' " +
-		                    "onclick=\"openEditModal('" +
-		                        p.id + "','" +
-		                        p.name + "','" +
-		                        p.category + "','" +
-		                        p.brand + "','" +
-		                        p.qty + "','" +
-		                        (p.min || 0) + "','" +
-		                        p.buy + "','" +
-		                        p.sell + "','" +
-		                        (p.img || '') +
-		                    "')\"></i>" +
-		                    "<span class='absolute bottom-full left-1/2 -translate-x-1/2 mb-2 " +
-		                          "hidden group-hover:block bg-black text-white text-[10px] " +
-		                          "py-1 px-2 rounded shadow-lg whitespace-nowrap z-50'>" +
-		                          "Update</span>" +
-		                "</div>" +
+		function showForm() {
+		    document.getElementById("food").style.display = "none";
+		    document.getElementById("medicine").style.display = "none";
+		    document.getElementById("care").style.display = "none";
+		    document.getElementById("accessory").style.display = "none";
 		
-		            "</div>" +
-		        "</td>" +
-	
-		    "</tr>";
-            tableBody.insertAdjacentHTML("beforeend", row);
-        });
-    })
-    .catch(err => {
-        console.error("Failed to load products:", err);
-    });
-}
+		    const c = document.getElementById("category").value;
+		
+		    if (c === "PET_FOOD")
+		        document.getElementById("food").style.display = "block";
+		
+		    if (c === "PET_MEDICINE")
+		        document.getElementById("medicine").style.display = "block";
+		
+		    if (c === "PET_CARE")
+		        document.getElementById("care").style.display = "block";
+		
+		    if (c === "PET_ACCESSORY")
+		        document.getElementById("accessory").style.display = "block";
+		}
+		
+		function previewImage(event) {
+		    const file = event.target.files[0];
+		    const preview = document.getElementById("preview");
+		    const placeholder = document.getElementById("uploadPlaceholder");
 
-function closeEditModal(){
-    document.getElementById("editModal").classList.add("hidden");
-}
+		    if (!file) return;
 
-/* ===== LIVE SEARCH ===== */
-searchInput.addEventListener("input", () => {
-    clearTimeout(typingTimer);
-    typingTimer = setTimeout(loadProducts, 400);
-});
+		    // Optional: validate file type
+		    if (!file.type.startsWith("image/")) {
+		        alert("Please select an image file");
+		        event.target.value = "";
+		        return;
+		    }
 
-/* ===== CATEGORY FILTER ===== */
-categoryFilter.addEventListener("change", loadProducts);
+		    const reader = new FileReader();
 
-function previewEditImage(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
+		    reader.onload = function () {
+		        preview.src = reader.result;
+		        preview.classList.remove("hidden");
+		        placeholder.classList.add("hidden");
+		    };
 
-        reader.onload = function (e) {
-            document.getElementById("editImg").src = e.target.result;
-        };
+		    reader.readAsDataURL(file);
+		}
+		
+		document.getElementById("category").addEventListener("change", () => {
+		    document.getElementById("preview").classList.add("hidden");
+		    document.getElementById("uploadPlaceholder").classList.remove("hidden");
+		});
 
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-</script>
+	</script>
+
 </body>
 </html>
