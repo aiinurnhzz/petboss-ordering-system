@@ -172,7 +172,7 @@ td {
                   px-4 rounded-full flex items-center gap-3
                   border-2 border-white shadow-md text-sm font-semibold">
 					<i class="fas fa-box-open w-5 text-center"></i> <span>Receive
-						Product</span>
+						Order</span>
 				</a> <a href="<%=request.getContextPath()%>/product-qc"
 					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
                   px-4 rounded-full flex items-center gap-3
@@ -212,7 +212,7 @@ td {
 				<hr class="border-green-600 mb-6">
 
 				<!-- SEARCH -->
-				<form class="search-form">
+				<div class="search-form">
 
 					<div class="search-box">
 						<input type="text" id="searchInput"
@@ -220,7 +220,7 @@ td {
 							class="search-input"> <i
 							class="fas fa-search search-icon"></i>
 					</div>
-				</form>
+				</div>
 
 				<!-- TABLE -->
 				<div class="overflow-x-auto">
@@ -293,6 +293,24 @@ td {
 						</tbody>
 
 					</table>
+<div class="flex justify-between items-center mt-6">
+
+    <div id="pagination"
+         class="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full">
+    </div>
+
+    <div class="flex items-center gap-2 text-sm">
+        <span class="text-gray-600">Rows:</span>
+        <select id="rowsPerPageSelect"
+                class="border border-gray-300 rounded-full px-3 py-1">
+            <option value="5">5 / page</option>
+            <option value="8" selected>8 / page</option>
+            <option value="10">10 / page</option>
+        </select>
+    </div>
+
+</div>
+
 
 
 				</div>
@@ -447,125 +465,233 @@ td {
 	</form>
 	</div>
 
+<script>
+/* =====================================================
+   GLOBAL VARIABLES (SAME AS PRODUCT)
+   ===================================================== */
+let rowsPerPage = 8;
+let currentPage = 1;
 
-	<script>
-function openViewSupplierModal(el) {
-    document.getElementById('viewSupplierId').value = el.dataset.id;
-    document.getElementById('viewSupplierName').value = el.dataset.name;
-    document.getElementById('viewSupplierEmail').value = el.dataset.email;
-    document.getElementById('viewSupplierPhone').value = el.dataset.phone;
-    document.getElementById('viewSupplierAddress').value = el.dataset.address;
-
-    document.getElementById('viewSupplierModal').classList.remove('hidden');
-}
-
-function closeViewSupplierModal() {
-    document.getElementById('viewSupplierModal').classList.add('hidden');
-}
-
-function openEditSupplierModal(el) {
-    document.getElementById('editSupplierId').value = el.dataset.id;
-    document.getElementById('editSupplierName').value = el.dataset.name;
-    document.getElementById('editSupplierEmail').value = el.dataset.email;
-    document.getElementById('editSupplierPhone').value = el.dataset.phone;
-    document.getElementById('editSupplierAddress').value = el.dataset.address;
-
-    document.getElementById('editSupplierModal').classList.remove('hidden');
-}
-
-function closeEditSupplierModal() {
-    document.getElementById('editSupplierModal').classList.add('hidden');
-}
-</script>
-	<script>
 const supplierSearch = document.getElementById("searchInput");
 const tableBody = document.querySelector("tbody");
+const pagination = document.getElementById("pagination");
+const rowsPerPageSelect = document.getElementById("rowsPerPageSelect");
 const contextPath = "<%=request.getContextPath()%>";
 
 let typingTimer;
 
-/* ===============================
-   AJAX LOAD SUPPLIERS
-   =============================== */
+/* =====================================================
+   ROWS PER PAGE CHANGE (CLONE PRODUCT)
+   ===================================================== */
+rowsPerPageSelect.addEventListener("change", () => {
+    rowsPerPage = Number(rowsPerPageSelect.value);
+    currentPage = 1;
+    paginateTable();
+});
+
+/* =====================================================
+   PAGINATION FUNCTION (CLONE PRODUCT)
+   ===================================================== */
+function paginateTable() {
+
+    const rows = document.querySelectorAll("tbody tr");
+    pagination.innerHTML = "";
+
+    if (rows.length === 0) return;
+
+    const totalPages = Math.ceil(rows.length / rowsPerPage);
+
+    // hide all rows
+    rows.forEach(row => row.style.display = "none");
+
+    // show current page rows
+    rows.forEach((row, index) => {
+        if (
+            index >= (currentPage - 1) * rowsPerPage &&
+            index < currentPage * rowsPerPage
+        ) {
+            row.style.display = "";
+        }
+    });
+
+    /* ===== PREVIOUS BUTTON ===== */
+    const prevBtn = document.createElement("button");
+    prevBtn.innerHTML = "&#8249;";
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.className =
+        "px-3 py-1 rounded-full " +
+        (prevBtn.disabled
+            ? "text-gray-400 cursor-not-allowed"
+            : "hover:bg-white");
+
+    prevBtn.onclick = () => {
+        currentPage--;
+        paginateTable();
+    };
+    pagination.appendChild(prevBtn);
+
+    /* ===== PAGE NUMBERS ===== */
+    const maxVisible = 5;
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(totalPages, start + maxVisible - 1);
+
+    if (start > 1) {
+        addPageButton(1);
+        addEllipsis();
+    }
+
+    for (let i = start; i <= end; i++) {
+        addPageButton(i);
+    }
+
+    if (end < totalPages) {
+        addEllipsis();
+        addPageButton(totalPages);
+    }
+
+    /* ===== NEXT BUTTON ===== */
+    const nextBtn = document.createElement("button");
+    nextBtn.innerHTML = "&#8250;";
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.className =
+        "px-3 py-1 rounded-full " +
+        (nextBtn.disabled
+            ? "text-gray-400 cursor-not-allowed"
+            : "hover:bg-white");
+
+    nextBtn.onclick = () => {
+        currentPage++;
+        paginateTable();
+    };
+    pagination.appendChild(nextBtn);
+
+    /* ===== HELPERS ===== */
+    function addPageButton(page) {
+        const btn = document.createElement("button");
+        btn.innerText = page;
+        btn.className =
+            page === currentPage
+                ? "px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 font-bold"
+                : "px-3 py-1 rounded-full hover:bg-white";
+
+        btn.onclick = () => {
+            currentPage = page;
+            paginateTable();
+        };
+        pagination.appendChild(btn);
+    }
+
+    function addEllipsis() {
+        const span = document.createElement("span");
+        span.innerText = "...";
+        span.className = "px-2 text-gray-400";
+        pagination.appendChild(span);
+    }
+}
+
+/* =====================================================
+   AJAX LOAD SUPPLIERS + PAGINATION SYNC
+   ===================================================== */
 function loadSuppliers() {
 
-    const keyword = supplierSearch.value;
-
     fetch(
-        contextPath + "/supplier?ajax=true&keyword=" +
-        encodeURIComponent(keyword)
+        contextPath +
+        "/supplier?ajax=true&keyword=" +
+        encodeURIComponent(supplierSearch.value || "")
     )
     .then(res => res.json())
     .then(data => {
 
         tableBody.innerHTML = "";
 
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
             tableBody.innerHTML =
                 "<tr>" +
-                "<td colspan='6' class='text-center py-6 text-gray-500'>" +
-                "No suppliers found" +
-                "</td></tr>";
+                "<td colspan='5' class='py-6 text-center text-gray-500'>No suppliers found</td>" +
+                "</tr>";
+            paginateTable();
             return;
         }
 
         data.forEach(s => {
+            tableBody.insertAdjacentHTML("beforeend",
+                "<tr>" +
+                    "<td>" + s.id + "</td>" +
+                    "<td>" + s.name + "</td>" +
+                    "<td>" + s.email + "</td>" +
+                    "<td>" + s.phone + "</td>" +
+                    "<td>" +
+                        "<div class='inline-flex gap-4 justify-center'>" +
 
-        	const row =
-        	    "<tr>" +
-        	        "<td>" + s.id + "</td>" +
-        	        "<td>" + s.name + "</td>" +
-        	        "<td>" + s.email + "</td>" +
-        	        "<td>" + s.phone + "</td>" +
-        	        "<td>" +
-        	            "<div class='inline-flex gap-4 justify-center'>" +
+                        "<i class='fas fa-eye text-black hover:scale-150 transition cursor-pointer' " +
+                        "data-id='" + s.id + "' data-name='" + s.name + "' " +
+                        "data-email='" + s.email + "' data-phone='" + s.phone + "' " +
+                        "data-address='" + s.address + "' onclick='openViewSupplierModal(this)'></i>" +
 
-        	                // 👁️ VIEW
-        	                "<div class='relative group flex flex-col items-center'>" +
-        	                    "<i class='fas fa-eye text-black hover:scale-150 transition text-lg cursor-pointer' " +
-        	                    "data-id='" + s.id + "' " +
-        	                    "data-name='" + s.name + "' " +
-        	                    "data-email='" + s.email + "' " +
-        	                    "data-phone='" + s.phone + "' " +
-        	                    "data-address='" + s.address + "' " +
-        	                    "onclick='openViewSupplierModal(this)'></i>" +
-        	                    "<span class='absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block " +
-        	                          "bg-black text-white text-[10px] py-1 px-2 rounded shadow-lg whitespace-nowrap z-50'>" +
-        	                          "View</span>" +
-        	                "</div>" +
+                        "<i class='fas fa-pencil-alt text-black hover:scale-150 transition cursor-pointer' " +
+                        "data-id='" + s.id + "' data-name='" + s.name + "' " +
+                        "data-email='" + s.email + "' data-phone='" + s.phone + "' " +
+                        "data-address='" + s.address + "' onclick='openEditSupplierModal(this)'></i>" +
 
-        	                // ✏️ EDIT
-        	                "<div class='relative group flex flex-col items-center'>" +
-        	                    "<i class='fas fa-pencil-alt text-black hover:scale-150 transition text-lg cursor-pointer' " +
-        	                    "data-id='" + s.id + "' " +
-        	                    "data-name='" + s.name + "' " +
-        	                    "data-email='" + s.email + "' " +
-        	                    "data-phone='" + s.phone + "' " +
-        	                    "data-address='" + s.address + "' " +
-        	                    "onclick='openEditSupplierModal(this)'></i>" +
-        	                    "<span class='absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block " +
-        	                          "bg-black text-white text-[10px] py-1 px-2 rounded shadow-lg whitespace-nowrap z-50'>" +
-        	                          "Update</span>" +
-        	                "</div>" +
-
-        	            "</div>" +
-        	        "</td>" +
-        	    "</tr>";
-
-
-            tableBody.insertAdjacentHTML("beforeend", row);
+                        "</div>" +
+                    "</td>" +
+                "</tr>"
+            );
         });
+
+        currentPage = 1;
+        paginateTable();
     });
 }
 
-/* ===============================
-   LIVE SEARCH LISTENER
-   =============================== */
+/* =====================================================
+   LIVE SEARCH (DEBOUNCE)
+   ===================================================== */
 supplierSearch.addEventListener("input", () => {
     clearTimeout(typingTimer);
     typingTimer = setTimeout(loadSuppliers, 400);
 });
+
+/* =====================================================
+   INITIAL LOAD
+   ===================================================== */
+document.addEventListener("DOMContentLoaded", paginateTable);
+
+/* =========================
+   VIEW SUPPLIER MODAL
+   ========================= */
+function openViewSupplierModal(el) {
+    document.getElementById("viewSupplierId").value = el.dataset.id;
+    document.getElementById("viewSupplierName").value = el.dataset.name;
+    document.getElementById("viewSupplierEmail").value = el.dataset.email;
+    document.getElementById("viewSupplierPhone").value = el.dataset.phone;
+    document.getElementById("viewSupplierAddress").value = el.dataset.address;
+
+    document.getElementById("viewSupplierModal").classList.remove("hidden");
+}
+
+function closeViewSupplierModal() {
+    document.getElementById("viewSupplierModal").classList.add("hidden");
+}
+
+/* =========================
+   EDIT SUPPLIER MODAL
+   ========================= */
+function openEditSupplierModal(el) {
+    document.getElementById("editSupplierId").value = el.dataset.id;
+    document.getElementById("editSupplierName").value = el.dataset.name;
+    document.getElementById("editSupplierEmail").value = el.dataset.email;
+    document.getElementById("editSupplierPhone").value = el.dataset.phone;
+    document.getElementById("editSupplierAddress").value = el.dataset.address;
+
+    document.getElementById("editSupplierModal").classList.remove("hidden");
+}
+
+function closeEditSupplierModal() {
+    document.getElementById("editSupplierModal").classList.add("hidden");
+}
 </script>
+
 
 </body>
 </html>
