@@ -20,7 +20,6 @@ public class CloudinaryService {
     }
 
     public String uploadProductImage(Part imagePart, String productId) {
-
         try {
             Map uploadResult = cloudinary.uploader().upload(
                 imagePart.getInputStream(),
