@@ -1,17 +1,23 @@
 package com.petboss.service;
 
 import com.cloudinary.Cloudinary;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.servlet.http.Part;
 
+import java.util.HashMap;
 import java.util.Map;
 
-@ApplicationScoped
 public class CloudinaryService {
 
-    @Inject
-    private Cloudinary cloudinary;
+    private static final Cloudinary cloudinary;
+
+    static {
+        Map<String, String> config = new HashMap<>();
+        config.put("cloud_name", System.getenv("CLOUDINARY_CLOUD_NAME"));
+        config.put("api_key", System.getenv("CLOUDINARY_API_KEY"));
+        config.put("api_secret", System.getenv("CLOUDINARY_API_SECRET"));
+
+        cloudinary = new Cloudinary(config);
+    }
 
     public String uploadProductImage(Part imagePart, String productId) {
 
