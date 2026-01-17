@@ -12,17 +12,6 @@
         (List<String>) request.getAttribute("receiveHistory");
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-    if (order == null) {
-%>
-        <h3>No order data found</h3>
-        <p>No receiving record is available yet.</p>
-        <a href="<%=request.getContextPath()%>/receive-order">
-            Back to Receive Orders
-        </a>
-<%
-        return;
-    }
 %>
 
 <!DOCTYPE html>
@@ -213,4 +202,5 @@ td {
 </div>
 </body>
 </html>
+
 
