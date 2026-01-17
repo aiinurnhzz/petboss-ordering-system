@@ -24,18 +24,18 @@ if (staffId == null || role == null || !"ADMIN".equalsIgnoreCase(role)) {
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-/* FORM TAB */
 body {
 	background-color: #f6efe6;
 }
 
+/* FORM HEADER */
 .form-header {
 	background-color: #1a8a43;
 	color: white;
-	padding: 10px 28px;
+	padding: 12px 36px;
 	font-weight: bold;
-	font-size: 18px;
-	border-radius: 15px 15px 0 0;
+	font-size: 20px;
+	border-radius: 18px 18px 0 0;
 	display: inline-block;
 }
 
@@ -43,46 +43,42 @@ body {
 .form-card {
 	background: white;
 	border: 2px solid #1a8a43;
-	border-radius: 0 20px 20px 20px;
-	padding: 28px 36px;
-	width: 800px;
+	border-radius: 0 24px 24px 24px;
+	padding: 36px 48px; /* ⬅ more breathing space */
+	width: 920px; /* ⬅ bigger form */
 }
 
 /* FORM ROW */
 .form-row {
 	display: flex;
 	align-items: center;
-	margin-bottom: 16px;
+	margin-bottom: 18px;
 }
 
 .form-row label {
-	width: 140px;
+	width: 110px; /* ⬅ closer to input */
 	font-weight: bold;
 }
 
+/* INPUTS */
 .form-row input {
 	flex: 1;
-	padding: 10px;
-	background-color: #e9f6f3;
-	border: none;
-	border-radius: 6px;
+	padding: 12px 14px;
+	background-color: #eef7f5;
+	border: 2px solid transparent;
+	border-radius: 10px;
 	font-size: 14px;
 }
 
-/* RADIO GROUP */
-.radio-group {
-	display: flex;
-	gap: 24px;
-}
-
-.radio-group label {
-	white-space: nowrap; /* ✅ keep one line */
+.form-row input:focus {
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(26, 138, 67, 0.4);
 }
 
 /* BUTTONS */
 .button-row {
 	display: flex;
-	justify-content: center;
+	justify-content: flex-end; /* 🔥 hujung kanan */
 	gap: 24px;
 	margin-top: 28px;
 }
@@ -92,6 +88,15 @@ body {
 	color: white;
 	padding: 10px 36px;
 	border-radius: 25px;
+	font-weight: bold;
+	text-decoration: none;
+	transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+	background: #5f5f5f;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+	transform: translateY(-1px);
 }
 
 .btn-save {
@@ -100,13 +105,74 @@ body {
 	padding: 10px 36px;
 	border-radius: 25px;
 	font-weight: bold;
+	border: none;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.btn-save:hover {
+	background: #147236;
+	box-shadow: 0 4px 12px rgba(26, 138, 67, 0.4);
+	transform: translateY(-1px);
+}
+
+.required {
+	color: #dc2626; /* Tailwind red-600 */
+}
+
+/* === FORCE FORM TO USE GRID FOR ROLE ROW === */
+.form-row.role-row {
+	display: grid;
+	grid-template-columns: 110px 1fr; /* SAME as label width */
+	align-items: start; /* 🔑 absolute fix */
+}
+
+/* ROLE ROW GRID */
+.form-row.role-row {
+	display: grid;
+	grid-template-columns: 110px auto;
+	align-items: center;
+}
+
+/* RADIO GROUP – CLEAN & CALM */
+.radio-group {
+	display: flex;
+	align-items: center;
+	gap: 32px; /* 🔥 sweet spot (tak rapat, tak jauh) */
+}
+
+/* RADIO ITEM */
+.radio-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px; /* radio rapat dgn text */
+	white-space: nowrap;
+	font-weight: normal; /* 🔥 BUANG bold clash */
+	color: #111827; /* dark neutral (tak terlalu hitam) */
+}
+
+/* REMOVE DEFAULT RADIO SPACING */
+.radio-item input[type="radio"] {
+	margin: 0;
+	padding: 0;
+}
+
+/* OPTIONAL: hover feel (soft) */
+.radio-item:hover {
+	cursor: pointer;
+	color: #1a8a43;
+}
+
+/* Extra space before Staff radio (PM ↔ Staff) */
+.radio-item.staff-gap {
+	margin-left: 32px; /* 🔥 adjust sini: 24px / 32px / 40px */
 }
 </style>
 </head>
 
 <body class="font-sans flex flex-col h-screen">
 
-	<!-- ===== HEADER ===== -->
+	<!-- ===== HEADER (SAME AS ADMIN) ===== -->
 	<header
 		class="w-full bg-[#266b8b] flex justify-between items-center px-6 py-3">
 		<h1 class="text-white text-2xl font-bold">Pet Boss Centre Cash
@@ -114,52 +180,58 @@ body {
 
 		<form action="<%=request.getContextPath()%>/logout" method="post">
 			<button
-				class="bg-[#f2711c] text-white px-4 py-1.5 rounded-xl
-                       flex items-center gap-2 font-semibold text-sm">
+				class="text-white font-semibold text-sm">
 				<i class="fas fa-sign-out-alt"></i> Logout
 			</button>
 		</form>
 	</header>
 
-	<div class="flex flex-1 overflow-hidden">
+<div class="flex flex-1 overflow-hidden">
 
-		<!-- ===== SIDEBAR ===== -->
-		<aside class="w-48 bg-[#266b8b] p-6 flex flex-col relative">
-			<nav class="w-full space-y-4">
+		<!-- ===== SIDEBAR (DO NOT CHANGE) ===== -->
+		<aside class="w-60 bg-[#266b8b] px-5 py-4 flex flex-col h-full">
+			<nav class="flex-1 space-y-5 mt-6">
 
 				<a href="<%=request.getContextPath()%>/dashboard"
-					class="w-full bg-[#f2711c] hover:bg-[#009a49] text-white py-2 px-4
-              rounded-full flex items-center gap-3 border-2 border-white shadow-md">
-					<i class="fas fa-home"></i> Home
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-home w-5 text-center"></i><span>Home</span>
 				</a> 
 				
 				<a href="<%=request.getContextPath()%>/profile"
-					class="w-full bg-[#f2711c] hover:bg-[#009a49] text-white py-2 px-4
-              rounded-full flex items-center gap-3 border-2 border-white shadow-md">
-					<i class="fas fa-user-circle"></i> Profile
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-user-circle w-5 text-center"></i><span>Profile</span>
 				</a> 
 				
 				<a href="<%=request.getContextPath()%>/staff"
-					class="w-full bg-[#009a49] hover:bg-[#009a49] text-white py-2 px-4
-              rounded-full flex items-center gap-3 border-2 border-white shadow-md">
-					<i class="fas fa-users"></i> Staff
+					class="mx-auto w-[85%] h-11 bg-[#009a49] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-users w-5 text-center"></i><span>Staff</span>
 				</a> 
 				
 				<a href="<%=request.getContextPath()%>/product"
-					class="w-full bg-[#f2711c] hover:bg-[#009a49] text-white py-2 px-4
-              rounded-full flex items-center gap-3 border-2 border-white shadow-md">
-					<i class="fas fa-box"></i> Product
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-box w-5 text-center"></i><span>Product</span>
 				</a> 
 				
 				<a href="<%=request.getContextPath()%>/supplier"
-					class="w-full bg-[#f2711c] hover:bg-[#009a49] text-white py-2 px-4
-              rounded-full flex items-center gap-3 border-2 border-white shadow-md">
-					<i class="fas fa-truck"></i> Supplier
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-truck w-5 text-center"></i><span>Supplier</span>
 				</a>
-
 			</nav>
-			<img src="<%=request.getContextPath()%>/images/logo_PetBoss.png"
-				class="absolute bottom-6 left-1/2 -translate-x-1/2 w-64 opacity-70">
+
+			<div class="flex justify-center mt-auto pb-4">
+				<img src="<%=request.getContextPath()%>/images/logo_PetBoss.png"
+					class="w-36 sm:w-40 md:w-44 opacity-100">
+			</div>
 		</aside>
 
 		<!-- ===== MAIN CONTENT ===== -->
@@ -170,70 +242,93 @@ body {
 
 				<div class="form-card">
 
-					<form action="<%=request.getContextPath()%>/registerStaff"
-						method="post">
+					<form action="<%=request.getContextPath()%>/registerStaff" method="post">
 
-						<div class="form-row">
-							<label>Staff ID:</label> <input name="staffId"
-								placeholder="Enter your Staff ID" required>
-						</div>
+				    <!-- STAFF ID (DISPLAY ONLY) -->
+				    <div class="form-row">
+				        <label>Staff ID</label>
+				        <input
+				            type="text"
+				            value="Auto generated by system"
+				            readonly
+				            class="bg-gray-200 text-gray-500 cursor-not-allowed">
+				    </div>
+				
+				    <div class="form-row">
+				        <label>Name <span class="required">*</span></label>
+				        <input name="name" placeholder="Enter full name" required>
+				    </div>
+				
+				    <div class="form-row">
+				        <label>Email</label>
+				        <input type="email" name="email"
+				               placeholder="example@petboss.com">
+				    </div>
+				
+				    <div class="form-row">
+				        <label>Phone No</label>
+				        <input name="phone" placeholder="01X-XXXXXXX">
+				    </div>
+				
+				    <div class="form-row">
+				        <label>Address</label>
+				        <input name="address" placeholder="Enter full address">
+				    </div>
+				
+				    <div class="form-row">
+				        <label>Role <span class="required">*</span></label>
+				        <div class="radio-group">
+				            <label class="radio-item">
+				                <input type="radio" name="role" value="Admin">
+				                <span>Admin</span>
+				            </label>
+				            <label class="radio-item">
+				                <input type="radio" name="role" value="Purchasing Manager">
+				                <span>Purchasing Manager</span>
+				            </label>
+				            <label class="radio-item staff-gap">
+				                <input type="radio" name="role" value="Staff">
+				                <span>Staff</span>
+				            </label>
+				        </div>
+				    </div>
+				
+				    <div class="form-row" id="pmIdRow" style="display:none;">
+					    <label>PM ID</label>
+					    <input name="pmId" placeholder="Enter Purchasing Manager ID">
+					</div>		
+				    <div class="button-row">
+				        <a href="<%=request.getContextPath()%>/staff" class="btn-cancel">Cancel</a>
+				        <button class="btn-save">Save</button>
+				    </div>
+				
+				</form>
 
-						<div class="form-row">
-							<label>Name:</label> <input name="name"
-								placeholder="Enter your full name" required>
-						</div>
-
-						<div class="form-row">
-							<label>Email:</label> <input type="email" name="email"
-								placeholder="Enter your email address">
-						</div>
-
-						<div class="form-row">
-							<label>Phone No:</label> <input name="phone"
-								placeholder="Enter your phone number">
-						</div>
-
-						<div class="form-row">
-							<label>Address:</label> <input name="address"
-								placeholder="Enter your address">
-						</div>
-
-						<div class="form-row">
-							<label>Role:</label>
-							<div class="radio-group">
-								<input type="radio" name="role" value="ADMIN" class="role-radio"> <span>Admin</span>
-								<input type="radio" name="role" value="PM" class="role-radio"> <span>Purchasing Manager</span>
-								<input type="radio" name="role" value="STAFF" class="role-radio"> <span>Staff</span>
-							</div>
-						</div>
-
-						<div class="form-row" id="pmIdRow" style="display:none;">
-						    <label>PM ID:</label>
-						    <input name="pmId" placeholder="Enter Purchasing Manager ID">
-						</div>
-
-						<div class="button-row">
-							<a href="<%=request.getContextPath()%>/staff" class="btn-cancel">Cancel</a>
-							<button class="btn-save">Save</button>
-						</div>
-
-					</form>
 				</div>
 			</div>
 
 		</main>
 	</div>
 	<script>
-		const roleRadios = document.querySelectorAll('input[name="role"]');
-		const pmIdRow = document.getElementById('pmIdRow');
-		
-		roleRadios.forEach(radio => {
-		    radio.addEventListener('change', () => {
-		        pmIdRow.style.display = (radio.value === 'STAFF' && radio.checked)
-		            ? 'flex'
-		            : 'none';
-		    });
-		});
-		</script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const roleRadios = document.querySelectorAll('input[name="role"]');
+    const pmIdRow = document.getElementById('pmIdRow');
+
+    roleRadios.forEach(radio => {
+        radio.addEventListener('change', function () {
+
+            if (this.value === "Staff") {
+                pmIdRow.style.display = "flex";
+            } else {
+                pmIdRow.style.display = "none";
+            }
+
+        });
+    });
+
+});
+</script>
+
 </body>
 </html>
