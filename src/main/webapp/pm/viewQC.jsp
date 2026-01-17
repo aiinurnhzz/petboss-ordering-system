@@ -98,7 +98,7 @@ if (qc == null) {
                   px-4 rounded-full flex items-center gap-3
                   border-2 border-white shadow-md text-sm font-semibold">
             <i class="fas fa-box-open w-5 text-center"></i>
-            <span>Receive Product</span>
+            <span>Receive Order</span>
         </a>
 
         <!-- ACTIVE -->
