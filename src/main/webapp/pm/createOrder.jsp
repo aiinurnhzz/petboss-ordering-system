@@ -96,7 +96,7 @@ td {
            class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
                   px-4 rounded-full flex items-center gap-3
                   border-2 border-white shadow-md text-sm font-semibold">
-            <i class="fas fa-box-open w-5 text-center"></i><span>Receive Product</span>
+            <i class="fas fa-box-open w-5 text-center"></i><span>Receive Order</span>
         </a>
 
         <a href="<%=request.getContextPath()%>/product-qc"
@@ -232,29 +232,33 @@ Please select supplier and order date first
 
 <div class="flex justify-end gap-6 mt-6">
 
-<a href="<%=request.getContextPath()%>/order"
-   class="w-32 h-11 flex items-center justify-center
-          bg-gray-500 text-white rounded-full
-          transition-all duration-200
-          hover:bg-gray-600 hover:shadow-md hover:-translate-y-0.5">
-    Cancel
-</a>
+    <!-- CANCEL -->
+    <a href="<%=request.getContextPath()%>/order"
+       class="w-32 h-11 flex items-center justify-center
+              bg-gray-500 text-white rounded-full">
+        Cancel
+    </a>
 
-<button type="submit"
+    <!-- SAVE PRODUCT (KEKAL) -->
+    
+    <button type="submit"
         class="w-32 h-11 flex items-center justify-center
-               bg-green-600 text-white rounded-full
-               transition-all duration-200
-               hover:bg-green-700 hover:shadow-md hover:-translate-y-0.5
-               active:translate-y-0">
-    Save
+              bg-green-600 text-white rounded-full">
+    Submit
 </button>
 
-<input type="hidden" name="productId[]" id="productIds">
-<input type="hidden" name="quantity[]" id="quantities">
-<input type="hidden" name="unitPrice[]" id="unitPrices">
-<input type="hidden" name="total[]" id="totals">
+
+
+    <!-- hidden inputs (KEKAL) -->
+    <input type="hidden" name="productId[]" id="productIds">
+    <input type="hidden" name="quantity[]" id="quantities">
+    <input type="hidden" name="unitPrice[]" id="unitPrices">
+    <input type="hidden" name="total[]" id="totals">
+    <input type="hidden" name="supplierId" id="supplierHidden">
+    <input type="hidden" name="orderDate" id="orderDateHidden">
 
 </div>
+
 </form>
 </main>
 </div>
@@ -265,13 +269,16 @@ Please select supplier and order date first
      class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
 
 <div class="bg-white p-6 w-[400px] rounded-xl border-2 border-green-600">
-<h3 class="text-xl font-bold mb-4">Add Product</h3>
+<h3 class="text-xl font-bold mb-4">ADD PRODUCT</h3>
 
 <label class="text-sm font-semibold">Product</label>
-<select id="productSelect" onchange="onProductChange()"
-        class="w-full border p-2 mb-3">
-<option value="">Select product</option>
-</select>
+<input list="productList"
+       id="productInput"
+       placeholder="Search product..."
+       class="w-full border p-2 mb-3"
+       oninput="onProductInputChange()">
+
+<datalist id="productList"></datalist>
 
 <label class="text-sm font-semibold">Product ID</label>
 <input id="productId" readonly class="w-full border p-2 mb-3 bg-gray-100">
@@ -287,12 +294,28 @@ Please select supplier and order date first
 <label class="text-sm font-semibold">Total</label>
 <input id="total" readonly class="w-full border p-2 bg-gray-100">
 
-<div class="flex justify-end gap-3 mt-4">
-<button type="button" onclick="closeModal()"
-        class="bg-gray-400 text-white px-4 py-2 rounded">Cancel</button>
-<button type="button" onclick="saveItem()"
-        class="bg-green-600 text-white px-4 py-2 rounded">Save</button>
+<div class="flex justify-center gap-6 mt-6">
+
+    <button type="button"
+            onclick="closeModal()"
+            class="w-32 h-11 flex items-center justify-center
+                   bg-gray-500 text-white rounded-full
+                   transition-all duration-200
+                   hover:bg-gray-600 hover:shadow-md hover:-translate-y-0.5">
+        Cancel
+    </button>
+
+<button type="button"
+        onclick="saveItem(event)"
+        class="w-32 h-11 flex items-center justify-center
+                   bg-green-600 text-white rounded-full
+                   transition-all duration-200
+                   hover:bg-gray-600 hover:shadow-md hover:-translate-y-0.5">
+    Save
+</button>
+
 </div>
+
 </div>
 </div>
 
@@ -327,29 +350,22 @@ function checkHeaderInfo(){
 
 // ===== LOCK / UNLOCK HEADER FIELDS (READONLY, NOT DISABLED) =====
 function lockHeaderFields(){
-    supplierSelect.setAttribute("readonly", true);
-    orderDateInput.setAttribute("readonly", true);
+    supplierSelect.style.pointerEvents = "none";
+    orderDateInput.readOnly = true;
 
     supplierSelect.classList.add("bg-gray-100","cursor-not-allowed");
     orderDateInput.classList.add("bg-gray-100","cursor-not-allowed");
 }
 
+
 function unlockHeaderFields(){
-    supplierSelect.removeAttribute("readonly");
-    orderDateInput.removeAttribute("readonly");
+    supplierSelect.style.pointerEvents = "auto";
+    orderDateInput.readOnly = false;
 
     supplierSelect.classList.remove("bg-gray-100","cursor-not-allowed");
     orderDateInput.classList.remove("bg-gray-100","cursor-not-allowed");
 }
 
-// ===== FORM VALIDATION =====
-function validateForm(){
-    if(orderItems.length === 0){
-        alert("Please add at least one product");
-        return false;
-    }
-    return true;
-}
 
 // ===== MODAL HANDLING =====
 function openModal(){
@@ -363,30 +379,38 @@ function openModal(){
     fetch("<%=request.getContextPath()%>/api/products")
         .then(r => r.json())
         .then(data => {
-            const s = document.getElementById("productSelect");
-            s.innerHTML = "<option value=''>Select product</option>";
-            data.forEach(p => {
-                const o = document.createElement("option");
-                o.value = p.id;
-                o.textContent = p.name;
-                o.dataset.price = p.price;
-                s.appendChild(o);
-            });
+        	const list = document.getElementById("productList");
+        	list.innerHTML = "";
+
+        	data.forEach(p => {
+        	    const option = document.createElement("option");
+        	    option.value = p.name;        // what user types
+        	    option.dataset.id = p.id;
+        	    option.dataset.price = p.price;
+        	    list.appendChild(option);
+        	});
         });
+}
+
+function onProductInputChange(){
+    const input = document.getElementById("productInput");
+    const options = document.getElementById("productList").options;
+
+    for(let o of options){
+        if(o.value === input.value){
+            document.getElementById("productId").value = o.dataset.id;
+            document.getElementById("unitPrice").value = o.dataset.price;
+            calculateTotal();
+            return;
+        }
+    }
+
+    document.getElementById("productId").value = "";
+    document.getElementById("unitPrice").value = "";
 }
 
 function closeModal(){
     document.getElementById("addProductModal").classList.add("hidden");
-}
-
-// ===== PRODUCT SELECTION =====
-function onProductChange(){
-    const s = document.getElementById("productSelect");
-    const o = s.options[s.selectedIndex];
-
-    document.getElementById("productId").value = o.value || "";
-    document.getElementById("unitPrice").value = o.dataset.price || "";
-    calculateTotal();
 }
 
 function calculateTotal(){
@@ -396,26 +420,28 @@ function calculateTotal(){
 }
 
 // ===== SAVE PRODUCT =====
-function saveItem(){
-    const s = document.getElementById("productSelect");
-    const o = s.options[s.selectedIndex];
-    if(!o.value){
-        alert("Select product");
-        return;
-    }
+function saveItem(event){
+    if(event) event.preventDefault(); // ⬅️ INI FIX SEBENAR
 
-    const pid = o.value;
+    const productName = document.getElementById("productInput").value;
+    const pid = document.getElementById("productId").value;
     const qty = Number(document.getElementById("quantity").value);
     const price = Number(document.getElementById("unitPrice").value);
 
+    if(!pid){
+        alert("Please select a valid product from the list");
+        return;
+    }
+
     const exist = orderItems.find(i => i.productId === pid);
+
     if(exist){
         exist.quantity += qty;
         exist.total = exist.quantity * price;
     } else {
         orderItems.push({
             productId: pid,
-            productName: o.text,
+            productName: productName,
             quantity: qty,
             unitPrice: price,
             total: qty * price
@@ -426,10 +452,10 @@ function saveItem(){
     updateHidden();
     updateSummary();
     closeModal();
-
-    // LOCK supplier & date after first product
     lockHeaderFields();
 }
+
+
 
 // ===== RENDER TABLE =====
 function renderTable(){
@@ -442,6 +468,8 @@ function renderTable(){
         return;
     }
 
+    const grandTotal = getGrandTotal();
+
     orderItems.forEach((i, idx) => {
         body.innerHTML +=
             "<tr>" +
@@ -449,11 +477,12 @@ function renderTable(){
             "<td>" + i.productName + "</td>" +
             "<td>" + i.quantity + "</td>" +
             "<td>" + i.unitPrice.toFixed(2) + "</td>" +
-            "<td>" + i.total.toFixed(2) + "</td>" +
+            "<td>" + grandTotal.toFixed(2) + "</td>" +
             "<td><i class='fas fa-trash cursor-pointer' onclick='removeItem(" + idx + ")'></i></td>" +
             "</tr>";
     });
 }
+
 
 // ===== REMOVE PRODUCT =====
 function removeItem(index){
@@ -477,6 +506,13 @@ function updateHidden(){
     totals.value = orderItems.map(i => i.total).join(",");
 }
 
+function getGrandTotal(){
+    let subtotal = 0;
+    orderItems.forEach(i => subtotal += i.total);
+    const tax = subtotal * 0.06;
+    return subtotal + tax;
+}
+
 // ===== UPDATE SUMMARY =====
 function updateSummary(){
     let subtotal = 0;
@@ -489,6 +525,19 @@ function updateSummary(){
     document.getElementById("sumTax").innerText = tax.toFixed(2);
     document.getElementById("sumGrand").innerText = (subtotal + tax).toFixed(2);
 }
+
+function validateForm(){
+    if(orderItems.length === 0){
+        alert("Please add at least one product");
+        return false;
+    }
+
+    supplierHidden.value = supplierSelect.value;
+    orderDateHidden.value = orderDateInput.value;
+
+    return true;
+}
+
 </script>
 
 </body>
