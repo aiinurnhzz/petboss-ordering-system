@@ -127,7 +127,7 @@ td {
    class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
           px-4 rounded-full flex items-center gap-3
           border-2 border-white shadow-md text-sm font-semibold">
-    <i class="fas fa-box-open w-5 text-center"></i> Receive Product
+    <i class="fas fa-box-open w-5 text-center"></i> Receive Order
 </a>
 
 <a href="<%=request.getContextPath()%>/product-qc"
