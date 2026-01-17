@@ -215,7 +215,7 @@ td {
                   px-4 rounded-full flex items-center gap-3
                   border-2 border-white shadow-md text-sm font-semibold">
             <i class="fas fa-box-open w-5 text-center"></i>
-            <span>Receive Product</span>
+            <span>Receive Order</span>
         </a>
 
         <a href="<%=request.getContextPath()%>/product-qc"
@@ -250,7 +250,8 @@ td {
 </div>
 
 <div class="search-wrapper">
-<input id="searchInput" class="search-input" placeholder="Search Receive Order by ID or Supplier">
+<input type="text" id="searchInput" class="search-input"
+       placeholder="Search Receive Order by ID or Supplier">
 <i class="fas fa-search search-icon"></i>
 </div>
 </div>
@@ -303,17 +304,129 @@ for (ReceiveOrder o : orderList) { %>
 </tbody>
 </table>
 
+<!-- ===== PAGINATION (SAME AS PRODUCT) ===== -->
+<div class="flex justify-between items-center mt-6">
+
+    <!-- LEFT : PAGE NUMBERS -->
+    <div id="pagination"
+         class="flex items-center gap-2 text-sm bg-gray-100 px-4 py-2 rounded-full">
+    </div>
+
+    <!-- RIGHT : ROWS PER PAGE -->
+    <div class="flex items-center gap-2 text-sm">
+        <span class="text-gray-600">Rows:</span>
+        <select id="rowsPerPageSelect"
+                class="border border-gray-300 rounded-full px-3 py-1 bg-white cursor-pointer">
+            <option value="5">5 / page</option>
+            <option value="10" selected>10 / page</option>
+            <option value="20">20 / page</option>
+        </select>
+    </div>
+
+</div>
+
 </div>
 </main>
 </div>
 
 <script>
-document.getElementById("searchInput").addEventListener("keyup", function () {
- let f=this.value.toLowerCase();
- document.querySelectorAll("tbody tr").forEach(r=>{
-  r.style.display=r.innerText.toLowerCase().includes(f)?"":"none";
- });
+/* ===============================
+   SEARCH (DO NOT HIDE ROWS)
+   =============================== */
+const searchInput = document.getElementById("searchInput");
+
+searchInput.addEventListener("input", () => {
+    const keyword = searchInput.value.toLowerCase();
+
+    document.querySelectorAll("table tbody tr").forEach(row => {
+        row.dataset.match =
+            row.innerText.toLowerCase().includes(keyword) ? "1" : "0";
+    });
+
+    currentPage = 1;
+    paginateTable();
+});
+
+/* ===============================
+   PAGINATION (SAME STYLE AS PRODUCT)
+   =============================== */
+let rowsPerPage = 10;
+let currentPage = 1;
+
+const rowsPerPageSelect = document.getElementById("rowsPerPageSelect");
+
+rowsPerPageSelect.addEventListener("change", () => {
+    rowsPerPage = Number(rowsPerPageSelect.value);
+    currentPage = 1;
+    paginateTable();
+});
+
+function paginateTable() {
+
+    const allRows = Array.from(document.querySelectorAll("table tbody tr"));
+    const rows = allRows.filter(r => r.dataset.match !== "0");
+
+    const pagination = document.getElementById("pagination");
+    pagination.innerHTML = "";
+
+    if (rows.length === 0) {
+        allRows.forEach(r => r.style.display = "none");
+        return;
+    }
+
+    const totalPages = Math.ceil(rows.length / rowsPerPage);
+
+    allRows.forEach(r => r.style.display = "none");
+
+    rows.forEach((row, index) => {
+        if (
+            index >= (currentPage - 1) * rowsPerPage &&
+            index < currentPage * rowsPerPage
+        ) {
+            row.style.display = "";
+        }
+    });
+
+    if (totalPages <= 1) return;
+
+    addNav("‹", currentPage === 1, () => { currentPage--; paginateTable(); });
+
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.innerText = i;
+        btn.className =
+            i === currentPage
+                ? "px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 font-bold"
+                : "px-3 py-1 rounded-full hover:bg-white";
+
+        btn.onclick = () => {
+            currentPage = i;
+            paginateTable();
+        };
+        pagination.appendChild(btn);
+    }
+
+    addNav("›", currentPage === totalPages, () => { currentPage++; paginateTable(); });
+
+    function addNav(label, disabled, action) {
+        const btn = document.createElement("button");
+        btn.innerHTML = label;
+        btn.disabled = disabled;
+        btn.className =
+            "px-3 py-1 rounded-full " +
+            (disabled ? "text-gray-400 cursor-not-allowed" : "hover:bg-white");
+        btn.onclick = action;
+        pagination.appendChild(btn);
+    }
+}
+
+/* ===== INITIAL ===== */
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("table tbody tr").forEach(r => r.dataset.match = "1");
+    paginateTable();
 });
 </script>
+
+
 </body>
 </html>
