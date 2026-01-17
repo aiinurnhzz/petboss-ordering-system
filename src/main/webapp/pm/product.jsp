@@ -309,14 +309,16 @@ input:disabled {
 								<!-- IMAGE -->
 								<td class="border p-2 text-center">
 									<%
-									if (p.getImage() != null) {
-									%> <img
-									src="<%=request.getContextPath()%>/product-image?file=<%=p.getImage()%>"
-									class="h-10 mx-auto"> <%
- } else {
- %> — <%
- }
- %>
+									if (p.getImage() != null && !p.getImage().isEmpty()) {
+									%>
+									    <img src="<%=p.getImage()%>" class="h-10 mx-auto">
+									<%
+									} else {
+									%>
+									    —
+									<%
+									}
+									%>
 								</td>
 
 								<td class="border p-2"><%=p.getProductId()%></td>
@@ -883,8 +885,8 @@ function openViewModal(id, name, cat, brand, qty, min, buy, sell, img) {
     document.getElementById("viewSell").value = sell;
 
     document.getElementById("viewImg").src = img
-        ? "<%=request.getContextPath()%>/product-image?file=" + img
-        : "<%=request.getContextPath()%>/images/default-product.png";
+    ? img
+    : "<%=request.getContextPath()%>/images/default-product.png";
 
     document.getElementById("viewModal").classList.remove("hidden");
 
@@ -957,8 +959,8 @@ function openEditModal(id, name, cat, brand, qty, min, buy, sell, img) {
     document.getElementById("editSell").value = sell;
 
     document.getElementById("editImg").src = img
-        ? "<%=request.getContextPath()%>/product-image?file=" + img
-        : "<%=request.getContextPath()%>/images/default-product.png";
+    ? img
+    : "<%=request.getContextPath()%>/images/default-product.png";
 
     document.getElementById("editModal").classList.remove("hidden");
 
@@ -1060,8 +1062,8 @@ function loadProducts() {
         data.forEach(p => {
 
             const imgHtml = p.img
-                ? "<img src='" + contextPath + "/product-image?file=" + p.img + "' class='h-10 mx-auto'>"
-                : "-";
+		    ? "<img src='" + p.img + "' class='h-10 mx-auto'>"
+		    : "-";
 
             tableBody.insertAdjacentHTML("beforeend",
                 "<tr>" +
@@ -1208,3 +1210,4 @@ document.addEventListener("DOMContentLoaded", paginateTable);
 </script>
 </body>
 </html>
+
