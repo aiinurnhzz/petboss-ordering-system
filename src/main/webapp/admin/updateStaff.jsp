@@ -46,12 +46,14 @@ body {
 
 /* FORM CARD */
 .form-card {
-	background: white;
-	border: 2px solid #1a8a43;
-	border-radius: 0 20px 20px 20px;
-	padding: 28px 36px;
-	width: 800px;
+    background: white;
+    border: 2px solid #1a8a43;
+    border-radius: 0 20px 20px 20px;
+    padding: 32px 48px;   /* lebih selesa kiri kanan */
+    width: 950px;        /* 🔥 LEBAR */
+    max-width: 95vw;     /* responsive – tak overflow */
 }
+
 
 /* FORM ROW */
 .form-row {
@@ -86,83 +88,112 @@ body {
 
 /* BUTTONS */
 .button-row {
-	display: flex;
-	justify-content: center;
-	gap: 24px;
-	margin-top: 28px;
+    display: flex;
+    justify-content: flex-end; /* 🔥 hujung kanan */
+    gap: 24px;
+    margin-top: 28px;
 }
 
 .btn-cancel {
-	background: #777;
-	color: white;
-	padding: 10px 36px;
-	border-radius: 25px;
+    background: #777;
+    color: white;
+    padding: 10px 36px;
+    border-radius: 25px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background: #5f5f5f;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transform: translateY(-1px);
 }
 
 .btn-save {
-	background: #1a8a43;
-	color: white;
-	padding: 10px 36px;
-	border-radius: 25px;
-	font-weight: bold;
+    background: #1a8a43;
+    color: white;
+    padding: 10px 36px;
+    border-radius: 25px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
+
+.btn-save:hover {
+    background: #147236;
+    box-shadow: 0 4px 12px rgba(26,138,67,0.4);
+    transform: translateY(-1px);
+}
+
+
 </style>
 </head>
 
 <body class="font-sans flex flex-col h-screen">
 
-<!-- HEADER -->
-<header class="w-full bg-[#266b8b] flex justify-between items-center px-6 py-3">
-    <h1 class="text-white text-2xl font-bold">Pet Boss Centre Cash and Carry</h1>
+	<!-- ===== HEADER (SAME AS ADMIN) ===== -->
+	<header
+		class="w-full bg-[#266b8b] flex justify-between items-center px-6 py-3">
+		<h1 class="text-white text-2xl font-bold">Pet Boss Centre Cash
+			and Carry</h1>
 
-    <form action="<%=request.getContextPath()%>/logout" method="post">
-        <button class="bg-[#f2711c] text-white px-4 py-1.5 rounded-xl
-                       flex items-center gap-2 font-semibold text-sm">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </button>
-    </form>
-</header>
+		<form action="<%=request.getContextPath()%>/logout" method="post">
+			<button
+				class="text-white font-semibold text-sm">
+				<i class="fas fa-sign-out-alt"></i> Logout
+			</button>
+		</form>
+	</header>
 
 <div class="flex flex-1 overflow-hidden">
 
-    <!-- SIDEBAR -->
-    <aside class="w-48 bg-[#266b8b] p-6 flex flex-col relative">
-        <nav class="w-full space-y-4">
+		<!-- ===== SIDEBAR (DO NOT CHANGE) ===== -->
+		<aside class="w-60 bg-[#266b8b] px-5 py-4 flex flex-col h-full">
+			<nav class="flex-1 space-y-5 mt-6">
 
-            <a href="<%=request.getContextPath()%>/dashboard"
-               class="w-full bg-[#f2711c] hover:bg-[#009a49]
-                      text-white py-2 px-4 rounded-full
-                      flex items-center gap-3 border-2 border-white shadow-md">
-                <i class="fas fa-home"></i> Home
-            </a>
-            
-			<a href="<%=request.getContextPath()%>/profile"
-					class="w-full bg-[#f2711c] hover:bg-[#009a49] text-white py-2 px-4
-              rounded-full flex items-center gap-3 border-2 border-white shadow-md">
-					<i class="fas fa-user-circle"></i> Profile
-			</a> 
-			
-            <a href="<%=request.getContextPath()%>/staff"
-               class="w-full bg-[#009a49] text-white py-2 px-4 rounded-full
-                      flex items-center gap-3 border-2 border-white shadow-md font-semibold">
-                <i class="fas fa-users"></i> Staff
-            </a>
-            
-             <a href="#"
-               class="w-full bg-[#f2711c] hover:bg-[#009a49] text-white py-2 px-4 rounded-full flex items-center gap-3 border-2 border-white shadow-md">
-                <i class="fas fa-box"></i> Product
-            </a>
+				<a href="<%=request.getContextPath()%>/dashboard"
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-home w-5 text-center"></i><span>Home</span>
+				</a> 
+				
+				<a href="<%=request.getContextPath()%>/profile"
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-user-circle w-5 text-center"></i><span>Profile</span>
+				</a> 
+				
+				<a href="<%=request.getContextPath()%>/staff"
+					class="mx-auto w-[85%] h-11 bg-[#009a49] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-users w-5 text-center"></i><span>Staff</span>
+				</a> 
+				
+				<a href="<%=request.getContextPath()%>/product"
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-box w-5 text-center"></i><span>Product</span>
+				</a> 
+				
+				<a href="<%=request.getContextPath()%>/supplier"
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-truck w-5 text-center"></i><span>Supplier</span>
+				</a>
+			</nav>
 
-            <a href="<%=request.getContextPath()%>/supplier"
-               class="w-full bg-[#f2711c] hover:bg-[#009a49] text-white py-2 px-4 rounded-full flex items-center gap-3 border-2 border-white shadow-md">
-                <i class="fas fa-truck"></i> Supplier
-            </a>
-            
-        </nav>
-
-        <img src="<%=request.getContextPath()%>/images/logo_PetBoss.png"
-				class="absolute bottom-6 left-1/2 -translate-x-1/2 w-64 opacity-70">
-    </aside>
+			<div class="flex justify-center mt-auto pb-4">
+				<img src="<%=request.getContextPath()%>/images/logo_PetBoss.png"
+					class="w-36 sm:w-40 md:w-44 opacity-100">
+			</div>
+		</aside>
 
     <!-- ===== MAIN CONTENT ===== -->
     <main class="flex-1 overflow-y-auto p-10 flex justify-center">
