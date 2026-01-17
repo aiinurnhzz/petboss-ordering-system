@@ -10,7 +10,6 @@ import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
-import jakarta.inject.Inject;
 import com.petboss.service.CloudinaryService;
 import java.io.IOException;
 
@@ -208,5 +207,6 @@ public class AddProductServlet extends HttpServlet {
 
 
 }
+
 
 
