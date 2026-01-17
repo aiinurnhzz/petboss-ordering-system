@@ -39,103 +39,166 @@ html, body {
     outline: none;
     box-shadow: 0 0 0 2px rgba(34,197,94,0.4);
 }
+
+/* ===== MODAL ACTION BUTTON GROUP ===== */
+.modal-actions {
+    display: flex;
+    justify-content: center;   /* ✅ CENTER */
+    gap: 24px;
+    margin-top: 24px;
+}
+
+/* ===== COMMON BUTTON ===== */
+.modal-btn {
+    width: 140px;
+    height: 44px;
+    border-radius: 999px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+/* ===== CANCEL (GREY) ===== */
+.btn-cancel {
+    background: #6b7280; /* gray-500 */
+    color: white;
+}
+
+.btn-cancel:hover {
+    background: #4b5563; /* gray-600 */
+    transform: scale(1.08);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== SAVE ===== */
+.btn-save {
+    background: #16a34a;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #15803d;
+    transform: scale(1.08);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+
 </style>
 </head>
 
 <body class="font-sans flex flex-col h-screen">
 
-<!-- ===== HEADER ===== -->
-<header class="w-full bg-[#266b8b] flex justify-between items-center px-6 py-3">
-    <h1 class="text-white text-2xl font-bold">
-        Pet Boss Centre Cash and Carry
-    </h1>
+	<!-- ===== HEADER (SAME AS ADMIN) ===== -->
+	<header
+		class="w-full bg-[#266b8b] flex justify-between items-center px-6 py-3">
+		<h1 class="text-white text-2xl font-bold">Pet Boss Centre Cash
+			and Carry</h1>
 
-    <form action="<%=request.getContextPath()%>/logout" method="post">
-        <button
-            class="bg-[#f2711c] text-white px-4 py-1.5 rounded-xl
-                   flex items-center gap-2 font-semibold text-sm hover:bg-orange-600">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </button>
-    </form>
-</header>
+		<form action="<%=request.getContextPath()%>/logout" method="post">
+			<button
+				class="text-white font-semibold text-sm">
+				<i class="fas fa-sign-out-alt"></i> Logout
+			</button>
+		</form>
+	</header>
 
 <div class="flex flex-1 overflow-hidden">
 
-<!-- ===== SIDEBAR ===== -->
-		<aside class="w-48 bg-[#266b8b] p-6 flex flex-col relative">
-			<nav class="w-full space-y-4">
+		<!-- ===== SIDEBAR (DO NOT CHANGE) ===== -->
+		<aside class="w-60 bg-[#266b8b] px-5 py-4 flex flex-col h-full">
+			<nav class="flex-1 space-y-5 mt-6">
 
 				<a href="<%=request.getContextPath()%>/dashboard"
-					class="w-full bg-[#f2711c] hover:bg-[#009a49] text-white py-2 px-4
-              rounded-full flex items-center gap-3 border-2 border-white shadow-md">
-					<i class="fas fa-home"></i> Home
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-home w-5 text-center"></i><span>Home</span>
 				</a> 
 				
 				<a href="<%=request.getContextPath()%>/profile"
-					class="w-full bg-[#009a49] hover:bg-[#009a49] text-white py-2 px-4
-              rounded-full flex items-center gap-3 border-2 border-white shadow-md">
-					<i class="fas fa-user-circle"></i> Profile
+					class="mx-auto w-[85%] h-11 bg-[#009a49] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-user-circle w-5 text-center"></i><span>Profile</span>
 				</a> 
 				
 				<a href="<%=request.getContextPath()%>/staff"
-					class="w-full bg-[#f2711c] hover:bg-[#009a49] text-white py-2 px-4
-              rounded-full flex items-center gap-3 border-2 border-white shadow-md">
-					<i class="fas fa-users"></i> Staff
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-users w-5 text-center"></i><span>Staff</span>
 				</a> 
 				
 				<a href="<%=request.getContextPath()%>/product"
-					class="w-full bg-[#f2711c] hover:bg-[#009a49] text-white py-2 px-4
-              rounded-full flex items-center gap-3 border-2 border-white shadow-md">
-					<i class="fas fa-box"></i> Product
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-box w-5 text-center"></i><span>Product</span>
 				</a> 
 				
 				<a href="<%=request.getContextPath()%>/supplier"
-					class="w-full bg-[#f2711c] hover:bg-[#009a49] text-white py-2 px-4
-              rounded-full flex items-center gap-3 border-2 border-white shadow-md">
-					<i class="fas fa-truck"></i> Supplier
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-truck w-5 text-center"></i><span>Supplier</span>
 				</a>
-
 			</nav>
-			<img src="<%=request.getContextPath()%>/images/logo_PetBoss.png"
-				class="absolute bottom-6 left-1/2 -translate-x-1/2 w-64 opacity-70">
+
+			<div class="flex justify-center mt-auto pb-4">
+				<img src="<%=request.getContextPath()%>/images/logo_PetBoss.png"
+					class="w-36 sm:w-40 md:w-44 opacity-100">
+			</div>
 		</aside>
 
 <!-- ===== MAIN CONTENT ===== -->
-<main class="relative flex-1 p-12 overflow-hidden flex justify-center items-center bg-[#fdf8e9]"
+<main class="relative flex-1 p-6 md:p-10 overflow-hidden flex justify-center items-center bg-[#fdf8e9]"
               style="background-size: cover; background-position: center;">
 
 
     <!-- PROFILE CARD -->
-    <div class="relative z-10 w-full max-w-4xl bg-white rounded-3xl shadow-xl border-2 border-[#009a49] overflow-hidden">
+    <div class="relative z-10 w-full max-w-6xl bg-white rounded-3xl shadow-xl border-2 border-[#009a49] overflow-hidden">
 				<div class="flex justify-between items-start w-full flex-shrink-0">
 					<div
 					class="bg-[#009a49] text-white py-3 px-16 inline-block rounded-br-3xl text-2xl font-bold tracking-widest">
 					PROFILE
 					</div>
 		</div>
-        <div class="p-8 flex flex-col md:flex-row gap-10">
+		<div class="p-10 flex flex-col md:flex-row gap-12">
 		
             <!-- LEFT -->
             <div
 					class="w-full md:w-1/3 border-2 border-gray-300 rounded-[20px] p-6 flex flex-col items-center">
 
-					<img src="<%=request.getContextPath()%>/uploads/staff/<%= staff.getPhoto() %>?t=<%= System.currentTimeMillis() %>"
-     					class="w-44 h-44 rounded-full border-[6px] border-sky-400
-                    flex items-center justify-center mb-4">
+<img src="<%=request.getContextPath()%>/uploads/staff/<%= staff.getPhoto() %>?t=<%= System.currentTimeMillis() %>"
+     class="w-44 h-44 rounded-full border-[6px] border-cyan-900
+            flex items-center justify-center mb-4">
+
+
+
 
 					<form action="<%=request.getContextPath()%>/uploadProfilePhoto"
 						method="post" enctype="multipart/form-data"
 						class="mb-4 text-center">
 
-						<label
-							class="bg-orange-500 text-white px-4 py-2 rounded-full text-sm cursor-pointer inline-flex items-center gap-2">
+<label
+    class="bg-blue-100 hover:bg-blue-200
+           text-blue-700 px-5 py-2.5 rounded-full
+           text-sm font-bold cursor-pointer
+           inline-flex items-center gap-2
+           border border-blue-300
+           transition">
+
+
+
 							<i class="fas fa-image"></i> Change Photo <input type="file"
 							name="photo" hidden onchange="this.form.submit()">
 						</label>
 					</form>
-
-                <div class="bg-blue-100 border border-blue-300 text-blue-800 px-12 rounded-lg 
-                			font-bold mb-4">
+<div class="bg-green-50 border border-green-200 text-green-700
+            px-5 py-1.5 rounded-full
+            font-bold mb-4">
                     <%= staff.getRole() %>
                 </div>
 
@@ -150,18 +213,24 @@ html, body {
 
                 <div class="flex items-center gap-3 mb-2">
 				    <!-- USER NAME -->
-				    <h2 class="text-3xl font-black uppercase">
+				    <h2 class="text-3xl font-black text-cyan-900 uppercase">
 				        <%= staff.getFullName() %>
 				    </h2>
 				
 				    <!-- PENCIL ICON -->
-				    <button onclick="openUpdateModal()"
-				            class="text-blue-500 hover:scale-110 transition-transform">
-				        <i class="fas fa-pencil-alt"></i>
-				    </button>
+<button onclick="openUpdateModal()"
+        class="flex items-center gap-2
+               bg-blue-50 text-blue-600
+               px-3 py-1.5 rounded-full
+               border border-blue-300
+               font-bold text-sm
+               hover:bg-blue-100 transition">
+    <i class="fas fa-pencil-alt"></i>
+    Edit Profile
+</button>
 				</div>
 
-                <div class="flex items-center gap-6 text-sm font-bold text-gray-600">
+                 <div class="flex items-center gap-6 text-sm font-bold text-gray-600">
                     <p>Joined : <%= staff.getJoinedDate() %></p>
                     <%
 					    String status = staff.getStatus(); // e.g. ACTIVE / INACTIVE
@@ -175,47 +244,63 @@ html, body {
 					    <%= status %>
 					</p>
                 </div>
+<div class="bg-green-50 text-green-700 text-center py-2
+            font-black tracking-widest rounded-md border
+            border-green-200 uppercase">
+    Personal Info
+</div>
 
-                <div class="bg-orange-50 text-orange-600 text-center py-1
-                            font-black tracking-widest rounded-md border
-                            border-orange-100 uppercase">
-                    Personal Info
-                </div>
 
                 <!-- INFO -->
                 <div class="space-y-3">
 
                     <div>
                         <label class="text-xs font-bold block mb-1">Full Name</label>
-                        <input type="text" value="<%= staff.getFullName() %>"
-                               readonly
-                               class="w-full bg-gray-200 border border-gray-400
-                                      rounded-lg px-3 py-2 text-gray-500">
+                       <input type="text" value="<%= staff.getFullName() %>"
+       readonly
+       class="w-full bg-slate-100 border border-slate-300
+              rounded-xl px-4 py-2.5 text-slate-700
+              cursor-not-allowed
+              hover:border-slate-400 transition">
+
+
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs font-bold block mb-1">Email</label>
-                            <input type="text" value="<%= staff.getEmail() %>"
-                                   readonly
-                                   class="w-full bg-gray-200 border border-gray-400
-                                          rounded-lg px-3 py-2 text-gray-500">
+                           <input type="text" value="<%= staff.getEmail() %>"
+       readonly
+       class="w-full bg-slate-100 border border-slate-300
+              rounded-xl px-4 py-2.5 text-slate-700
+              cursor-not-allowed
+              hover:border-slate-400 transition">
+
+
                         </div>
 
                         <div>
                             <label class="text-xs font-bold block mb-1">Phone Number</label>
                             <input type="text" value="<%= staff.getPhone() %>"
-                                   readonly
-                                   class="w-full bg-gray-200 border border-gray-400
-                                          rounded-lg px-3 py-2 text-gray-500">
+       readonly
+       class="w-full bg-slate-100 border border-slate-300
+              rounded-xl px-4 py-2.5 text-slate-700
+              cursor-not-allowed
+              hover:border-slate-400 transition">
+
+
                         </div>
                     </div>
 
                     <div>
                         <label class="text-xs font-bold block mb-1">Address</label>
-                        <textarea rows="3" readonly
-                                  class="w-full bg-gray-200 border border-gray-400
-                                         rounded-lg px-3 py-2 text-gray-500"><%= staff.getAddress() %></textarea>
+                       <textarea rows="3" readonly
+          class="w-full bg-slate-100 border border-slate-300
+                 rounded-xl px-4 py-3
+                 text-slate-700 resize-none
+                 cursor-not-allowed
+                 hover:border-slate-400 transition"><%= staff.getAddress() %></textarea>
+
                     </div>
 
                 </div>
@@ -234,31 +319,37 @@ html, body {
 
         <!-- TITLE -->
         <div class="text-center py-4">
-            <h3 class="text-2xl font-bold uppercase tracking-wide">
+            <h3 class="text-2xl font-black text-cyan-900 uppercase tracking-wide">
                 Update Information
             </h3>
+           
         </div>
-
+        
+ <hr class="border-green-600 mb-4">
         <div class="px-8 pb-8 space-y-4">
 
     <!-- FULL NAME -->
     <div>
         <label class="font-bold text-sm">Full Name</label>
-        <input type="text"
-               value="<%= staff.getFullName() %>"
-               readonly
-               class="w-full bg-gray-200 border rounded-lg
-                      px-3 py-2 text-gray-500 cursor-not-allowed">
+       <input type="text"
+       value="<%= staff.getFullName() %>"
+       readonly
+       class="w-full bg-slate-100 border border-slate-300
+              rounded-xl px-4 py-2.5
+              text-slate-700 cursor-not-allowed
+              hover:border-slate-400 transition">
     </div>
 
     <!-- EMAIL -->
     <div>
         <label class="font-bold text-sm">Email</label>
         <input type="text"
-               value="<%= staff.getEmail() %>"
-               readonly
-               class="w-full bg-gray-200 border rounded-lg
-                      px-3 py-2 text-gray-500 cursor-not-allowed">
+       value="<%= staff.getEmail() %>"
+       readonly
+       class="w-full bg-slate-100 border border-slate-300
+              rounded-xl px-4 py-2.5
+              text-slate-700 cursor-not-allowed
+              hover:border-slate-400 transition">
     </div>
 
     <hr class="opacity-30">
@@ -280,21 +371,21 @@ html, body {
     </div>
 
     <!-- BUTTONS -->
-    <div class="flex gap-4 pt-4">
-        <button onclick="closeUpdateModal()"
-                type="button"
-                class="flex-1 bg-gray-500 text-white
-                       py-2 rounded-xl font-bold">
-            Cancel
-        </button>
+ <div class="modal-actions">
 
-        <button onclick="saveProfile()"
-                type="button"
-                class="flex-1 bg-green-600 text-white
-                       py-2 rounded-xl font-bold">
-            Save
-        </button>
-    </div>
+    <button type="button"
+            onclick="closeUpdateModal()"
+            class="modal-btn btn-cancel">
+        Cancel
+    </button>
+
+    <button type="button"
+            onclick="saveProfile()"
+            class="modal-btn btn-save">
+        Save
+    </button>
+
+</div>
 
 </div>
 </div>
