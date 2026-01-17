@@ -19,19 +19,23 @@ public class CloudinaryService {
         cloudinary = new Cloudinary(config);
     }
 
-    public String uploadProductImage(Part imagePart, String productId) {
-        try {
-            Map uploadResult = cloudinary.uploader().upload(
-                imagePart.getInputStream(),
-                Map.of(
-                    "folder", "products",
-                    "public_id", productId,
-                    "overwrite", true
-                )
-            );
+   public String uploadProductImage(Part imagePart, String productId) {
+    try {
 
-            return uploadResult.get("secure_url").toString();
+        byte[] fileBytes = imagePart.getInputStream().readAllBytes();
 
+        Map uploadResult = cloudinary.uploader().upload(
+            fileBytes,
+            Map.of(
+                "folder", "products",
+                "public_id", productId,
+                "overwrite", true,
+                "resource_type", "image"
+            )
+        );
+
+        return uploadResult.get("secure_url").toString();
+        
         } catch (Exception e) {
             throw new RuntimeException("Cloudinary upload failed", e);
         }
