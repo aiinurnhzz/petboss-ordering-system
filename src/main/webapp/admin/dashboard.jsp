@@ -1,206 +1,233 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.text.SimpleDateFormat" %>
-<%@ page import="com.petboss.model.Order" %>
-<%@ page import="com.petboss.model.OrderItem" %>
+<%@ page contentType="text/html; charset=UTF-8"%>
+<%@ page session="true"%>
+<%@ page import="java.util.List"%>
+<%@ page import="com.petboss.model.Product"%>
+<%@ page import="com.petboss.model.Activity"%>
 
 <%
-    Order order = (Order) request.getAttribute("order");
-    List<OrderItem> itemList =
-        (List<OrderItem>) request.getAttribute("itemList");
-    List<String> receiveHistory =
-        (List<String>) request.getAttribute("receiveHistory");
+String staffId = (String) session.getAttribute("staffId");
+String role = (String) session.getAttribute("role");
 
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+if (staffId == null || role == null || !"ADMIN".equalsIgnoreCase(role)) {
+    response.sendRedirect(request.getContextPath() + "/login.jsp");
+    return;
+}
+
+String staffName = (String) session.getAttribute("staffName");
+if (staffName == null) staffName = "Admin";
+
+String period = request.getParameter("period");
+if (period == null) period = "today";
 %>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>View Received Order</title>
+<meta charset="UTF-8">
+<title>Admin Dashboard</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
-body {
-    margin:0;
-    font-family: Arial, sans-serif;
-    background:#f7f2e9;
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background-color: #fdf8e9;
 }
 
-.sidebar {
-    width:220px;
-    background:#1f6787;
-    position:fixed;
-    top:0;
-    bottom:0;
-    padding-top:20px;
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb {
+    background-color: #94a3b8;
+    border-radius: 6px;
 }
+::-webkit-scrollbar-track { background: transparent; }
 
-.sidebar a {
-    display:block;
-    padding:12px 20px;
-    color:white;
-    text-decoration:none;
-}
-
-.sidebar a.active {
-    background:#2ea44f;
-}
-
-.content {
-    margin-left:220px;
-    padding:30px;
-}
-
-h2 {
-    margin-bottom:10px;
-}
-
-.section {
-    background:white;
-    border:2px solid #2ea44f;
-    border-radius:12px;
-    padding:20px;
-    margin-bottom:25px;
-}
-
-.info-grid {
-    display:grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap:10px 30px;
-}
-
-.info-grid div {
-    font-size:14px;
-}
-
-table {
-    width:100%;
-    border-collapse:collapse;
-}
-
-th {
-    background:#e9fff3;
-    padding:12px;
-    text-align:left;
-}
-
-td {
-    padding:12px;
-    border-top:1px solid #ddd;
-}
-
-.status {
-    padding:4px 12px;
-    border-radius:999px;
-    font-size:12px;
-    font-weight:600;
-    background:#e8f5e9;
-    color:#2e7d32;
-}
-
-.back-btn {
-    display:inline-block;
-    margin-top:10px;
-    background:#2ea44f;
-    color:white;
-    padding:8px 18px;
-    border-radius:999px;
-    text-decoration:none;
-    font-size:13px;
-    font-weight:600;
+/* Prevent scroll chaining */
+.scroll-lock {
+    overscroll-behavior: contain;
 }
 </style>
 </head>
 
-<body>
+<body class="font-sans flex flex-col h-screen">
 
-<div class="sidebar">
-    <a class="active">Receive Product</a>
+	<!-- ===== HEADER (SAME AS ADMIN) ===== -->
+	<header
+		class="w-full bg-[#266b8b] flex justify-between items-center px-6 py-3">
+		<h1 class="text-white text-2xl font-bold">Pet Boss Centre Cash
+			and Carry</h1>
+
+		<form action="<%=request.getContextPath()%>/logout" method="post">
+			<button
+				class="text-white font-semibold text-sm">
+				<i class="fas fa-sign-out-alt"></i> Logout
+			</button>
+		</form>
+	</header>
+
+<div class="flex flex-1 overflow-hidden">
+
+		<!-- ===== SIDEBAR (DO NOT CHANGE) ===== -->
+		<aside class="w-60 bg-[#266b8b] px-5 py-4 flex flex-col h-full">
+			<nav class="flex-1 space-y-5 mt-6">
+
+				<a href="<%=request.getContextPath()%>/dashboard"
+					class="mx-auto w-[85%] h-11 bg-[#009a49] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-home w-5 text-center"></i><span>Home</span>
+				</a> <a href="<%=request.getContextPath()%>/profile"
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-user-circle w-5 text-center"></i><span>Profile</span>
+				</a> <a href="<%=request.getContextPath()%>/staff"
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-users w-5 text-center"></i><span>Staff</span>
+				</a> <a href="<%=request.getContextPath()%>/product"
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-box w-5 text-center"></i><span>Product</span>
+				</a> <a href="<%=request.getContextPath()%>/supplier"
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-truck w-5 text-center"></i><span>Supplier</span>
+				</a>
+			</nav>
+
+			<div class="flex justify-center mt-auto pb-4">
+				<img src="<%=request.getContextPath()%>/images/logo_PetBoss.png"
+					class="w-36 sm:w-40 md:w-44 opacity-100">
+			</div>
+		</aside>
+
+<!-- ===== MAIN ===== -->
+<main class="flex-1 p-6 overflow-hidden">
+
+<!-- GREETING -->
+<div class="mb-4">
+    <h2 class="text-3xl font-black text-cyan-900 uppercase">
+        Welcome, <%= staffName %>
+    </h2>
 </div>
 
-<div class="content">
+<!-- ===== STATS ===== -->
+<div class="grid grid-cols-4 gap-6 mb-6">
 
-<h2>Completed Receiving</h2>
+<div class="bg-cyan-400 text-white p-6 rounded-xl text-center shadow-md">
+    <i class="fas fa-boxes text-2xl mb-2"></i>
+    <p class="text-4xl font-bold"><%= request.getAttribute("totalProducts") %></p>
+    <p class="text-sm">Products</p>
+</div>
 
-<!-- ===== ORDER INFO ===== -->
-<div class="section">
-    <h3>Order Information</h3>
+<div class="bg-orange-500 text-white p-6 rounded-xl text-center shadow-md">
+    <i class="fas fa-users text-2xl mb-2"></i>
+    <p class="text-4xl font-bold"><%= request.getAttribute("totalStaff") %></p>
+    <p class="text-sm">Staff</p>
+</div>
 
-    <div class="info-grid">
-        <div><b>Order ID:</b> <%=order.getOrderId()%></div>
-        <div><b>Supplier:</b> <%=order.getSupplierName()%></div>
-        <div><b>Order Date:</b> <%=sdf.format(order.getOrderDate())%></div>
-        <div><b>Status:</b> <span class="status"><%=order.getStatus()%></span></div>
-        <div><b>Staff:</b> <%=order.getStaffName()%></div>
+<div class="bg-sky-800 text-white p-6 rounded-xl text-center shadow-md">
+    <i class="fas fa-truck text-2xl mb-2"></i>
+    <p class="text-4xl font-bold"><%= request.getAttribute("totalSuppliers") %></p>
+    <p class="text-sm">Suppliers</p>
+</div>
+
+<div onclick="highlightAlerts()"
+     class="cursor-pointer bg-red-500 text-white p-6 rounded-xl text-center shadow-md">
+    <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+    <p class="text-4xl font-bold"><%= request.getAttribute("lowStockCount") %></p>
+    <p class="text-sm">Low Stock</p>
+</div>
+
+</div>
+
+<!-- ===== ALERTS + ACTIVITY ===== -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+<!-- ALERTS -->
+<div id="alertCard"
+     class="bg-white rounded-xl shadow-md flex flex-col h-[360px] overflow-hidden">
+
+    <div class="px-4 py-3 border-b text-lg font-bold">
+        Alerts
+    </div>
+
+    <div class="px-4 py-3 flex-1 overflow-y-auto text-sm space-y-3 scroll-lock">
+        <%
+        List<Product> lowStock = (List<Product>) request.getAttribute("lowStockList");
+        if (lowStock != null && !lowStock.isEmpty()) {
+            for (Product p : lowStock) {
+        %>
+        <div class="border-b pb-2">
+            <b><%= p.getName() %></b><br>
+            Stock <%= p.getQuantity() %> (Min: <%= p.getMinQuantity() %>)
+        </div>
+        <% 
+            }
+        } else { 
+        %>
+        <p class="text-gray-500">No low stock items</p>
+        <% } %>
     </div>
 </div>
 
-<!-- ===== ITEM LIST ===== -->
-<div class="section">
-    <h3>Received Items</h3>
+<!-- RECENT ACTIVITY -->
+<div class="bg-white rounded-xl shadow-md flex flex-col h-[360px] overflow-hidden">
 
-    <table>
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Quantity Ordered</th>
-                <th>Quantity Received</th>
-            </tr>
-        </thead>
-        <tbody>
+    <div class="px-4 py-3 border-b flex justify-between items-center">
+        <span class="text-lg font-bold">Recent Activity</span>
+
+        <form method="get">
+            <select name="period"
+                    onchange="this.form.submit()"
+                    class="text-sm border rounded-md px-3 py-1">
+                <option value="today" <%= "today".equals(period) ? "selected" : "" %>>Today</option>
+                <option value="week" <%= "week".equals(period) ? "selected" : "" %>>Week</option>
+                <option value="month" <%= "month".equals(period) ? "selected" : "" %>>Month</option>
+            </select>
+        </form>
+    </div>
+
+    <div class="px-4 py-3 flex-1 overflow-y-auto text-sm space-y-3 scroll-lock">
         <%
-            if (itemList != null && !itemList.isEmpty()) {
-                for (OrderItem i : itemList) {
+        List<Activity> activities = (List<Activity>) request.getAttribute("recentActivities");
+        if (activities != null && !activities.isEmpty()) {
+            for (Activity a : activities) {
         %>
-            <tr>
-                <td><%=i.getProductName()%></td>
-                <td><%=i.getQuantity()%></td>
-                <td><%=i.getReceived()%></td>
-            </tr>
-        <%
-                }
-            } else {
-        %>
-            <tr>
-                <td colspan="3" style="text-align:center;padding:20px;">
-                    No items found
-                </td>
-            </tr>
-        <%
+        <div class="border-b pb-2">
+            <b><%= a.getTime() %></b><br>
+            <%= a.getStaffName() %> <%= a.getDescription() %>
+        </div>
+        <% 
             }
+        } else { 
         %>
-        </tbody>
-    </table>
+        <p class="text-gray-500">No recent activity</p>
+        <% } %>
+    </div>
 </div>
 
-<!-- ===== RECEIVE HISTORY ===== -->
-<div class="section">
-    <h3>Receive History</h3>
-
-    <ul>
-    <%
-        if (receiveHistory != null && !receiveHistory.isEmpty()) {
-            for (String h : receiveHistory) {
-    %>
-        <li><%=h%></li>
-    <%
-            }
-        } else {
-    %>
-        <li>No receive history available</li>
-    <%
-        }
-    %>
-    </ul>
+</div>
+</main>
 </div>
 
-<a class="back-btn"
-   href="<%=request.getContextPath()%>/receive-order?tab=completed">
-   ← Back to Completed Orders
-</a>
+<script>
+function highlightAlerts() {
+    const card = document.getElementById("alertCard");
+    card.classList.add("ring-4","ring-red-400");
+    setTimeout(() => {
+        card.classList.remove("ring-4","ring-red-400");
+    }, 2000);
+}
+</script>
 
-</div>
 </body>
 </html>
-
-
