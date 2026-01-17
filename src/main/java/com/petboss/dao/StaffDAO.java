@@ -62,25 +62,24 @@ public class StaffDAO {
 	// ===============================
 	public void insertStaff(Staff s, Connection con) throws SQLException {
 
-	    String sql = """
-	        INSERT INTO STAFF
-	        (STAFF_ID, FULL_NAME, PASSWORD, EMAIL, PHONE_NO, ADDRESS,
-	         ROLE, PM_ID, STATUS, PHOTO)
-	        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	    """;
+		String sql = """
+			    INSERT INTO STAFF
+			    (FULL_NAME, PASSWORD, EMAIL, PHONE_NO, ADDRESS,
+			     ROLE, PM_ID, STATUS, PHOTO)
+			    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+			""";
 
 	    try (PreparedStatement ps = con.prepareStatement(sql)) {
 
-	        ps.setString(1, s.getStaffId());
-	        ps.setString(2, s.getFullName());
-	        ps.setString(3, s.getPassword());
-	        ps.setString(4, s.getEmail());
-	        ps.setString(5, s.getPhone());
-	        ps.setString(6, s.getAddress());
-	        ps.setString(7, s.getRole());
-	        ps.setString(8, s.getPmId());
-	        ps.setString(9, s.getStatus());
-	        ps.setString(10, s.getPhoto());
+	    	ps.setString(1, s.getFullName());
+	    	ps.setString(2, s.getPassword());
+	    	ps.setString(3, s.getEmail());
+	    	ps.setString(4, s.getPhone());
+	    	ps.setString(5, s.getAddress());
+	    	ps.setString(6, s.getRole());
+	    	ps.setString(7, s.getPmId());
+	    	ps.setString(8, s.getStatus());
+	    	ps.setString(9, s.getPhoto());
 
 	        ps.executeUpdate();
 	    }
@@ -129,26 +128,25 @@ public class StaffDAO {
     // ===============================
     public void insertStaff(Staff s) {
 
-        String sql = """
-            INSERT INTO STAFF
-            (STAFF_ID, FULL_NAME, PASSWORD, EMAIL, PHONE_NO, ADDRESS,
-             ROLE, PM_ID, STATUS, PHOTO)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """;
+    	String sql = """
+    		    INSERT INTO STAFF
+    		    (FULL_NAME, PASSWORD, EMAIL, PHONE_NO, ADDRESS,
+    		     ROLE, PM_ID, STATUS, PHOTO)
+    		    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    		""";
 
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setString(1, s.getStaffId());
-            ps.setString(2, s.getFullName());
-            ps.setString(3, s.getPassword());
-            ps.setString(4, s.getEmail());
-            ps.setString(5, s.getPhone());
-            ps.setString(6, s.getAddress());
-            ps.setString(7, s.getRole());
-            ps.setString(8, s.getPmId());
-            ps.setString(9, "ACTIVE");
-            ps.setString(10, s.getPhoto()); // NULL allowed
+        	ps.setString(1, s.getFullName());
+        	ps.setString(2, s.getPassword());
+        	ps.setString(3, s.getEmail());
+        	ps.setString(4, s.getPhone());
+        	ps.setString(5, s.getAddress());
+        	ps.setString(6, s.getRole());
+        	ps.setString(7, s.getPmId());
+        	ps.setString(8, "Active");
+        	ps.setString(9, s.getPhoto());
 
             ps.executeUpdate();
 
