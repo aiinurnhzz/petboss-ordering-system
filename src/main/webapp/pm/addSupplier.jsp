@@ -98,7 +98,7 @@ td {
                   px-4 rounded-full flex items-center gap-3
                   border-2 border-white shadow-md text-sm font-semibold">
 					<i class="fas fa-box-open w-5 text-center"></i> <span>Receive
-						Product</span>
+						Order</span>
 				</a> <a href="<%=request.getContextPath()%>/product-qc"
 					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
                   px-4 rounded-full flex items-center gap-3
