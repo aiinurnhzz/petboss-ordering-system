@@ -41,19 +41,18 @@ public class RegisterStaffServlet extends HttpServlet {
             return;
         }
 
-        // PM ID required ONLY for STAFF
-        if ("STAFF".equals(role)) {
+     // PM ID required ONLY for STAFF
+        if ("Staff".equalsIgnoreCase(role)) {
             if (pmId == null || pmId.trim().isEmpty()) {
                 req.setAttribute("error", "PM ID is required for Staff");
                 req.getRequestDispatcher("/admin/registerStaff.jsp").forward(req, resp);
                 return;
             }
         } else {
-            pmId = null;
+            pmId = null; // Admin & Purchasing Manager
         }
 
         Staff staff = new Staff();
-        staff.setStaffId(req.getParameter("staffId").toUpperCase());
         staff.setFullName(req.getParameter("name"));
         staff.setEmail(req.getParameter("email"));
         staff.setPhone(req.getParameter("phone"));
