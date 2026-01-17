@@ -44,7 +44,7 @@ public class ProfileServlet extends HttpServlet {
             // =========================
             // ADMIN PROFILE
             // =========================
-            if ("ADMIN".equalsIgnoreCase(role)) {
+            if ("Admin".equalsIgnoreCase(role)) {
                 req.getRequestDispatcher("/admin/profile.jsp")
                    .forward(req, resp);
                 return;
@@ -60,7 +60,16 @@ public class ProfileServlet extends HttpServlet {
             }
 
             // =========================
-            // OTHER ROLES
+            // STAFF PROFILE
+            // =========================
+            if ("Staff".equalsIgnoreCase(role)) {
+                req.getRequestDispatcher("/staff/profile.jsp")
+                   .forward(req, resp);
+                return;
+            }
+
+            // =========================
+            // UNKNOWN ROLE
             // =========================
             resp.sendRedirect(req.getContextPath() + "/unauthorized.jsp");
 
@@ -69,3 +78,4 @@ public class ProfileServlet extends HttpServlet {
         }
     }
 }
+
