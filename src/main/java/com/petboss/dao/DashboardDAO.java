@@ -47,46 +47,52 @@ public class DashboardDAO {
     }
 
 
-    public List<Activity> getRecentActivities(String period) throws Exception {
+    public List<Activity> getRecentActivities(String period) {
 
-        List<Activity> list = new ArrayList<>();
+    List<Activity> list = new ArrayList<>();
 
-        String condition;
+    String dateCondition;
 
-        switch (period) {
-            case "week":
-                condition = "created_at >= TRUNC(SYSDATE) - 7";
-                break;
+    switch (period) {
+        case "week":
+            dateCondition = "created_at >= CURRENT_DATE - INTERVAL '7 days'";
+            break;
 
-            case "month":
-                condition = "created_at >= ADD_MONTHS(TRUNC(SYSDATE), -1)";
-                break;
+        case "month":
+            dateCondition = "created_at >= CURRENT_DATE - INTERVAL '1 month'";
+            break;
 
-            default: // today
-                condition = "TRUNC(created_at) = TRUNC(SYSDATE)";
-        }
-
-        String sql =
-            "SELECT staff_name, " +
-            "       description, " +
-            "       TO_CHAR(created_at,'DD Mon YYYY HH:MI AM') AS time " +
-            "FROM activity_log " +
-            "WHERE " + condition + " " +   // 🔥 SPACE PENTING
-            "ORDER BY created_at DESC";
-
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Activity a = new Activity();
-                a.setStaffName(rs.getString("staff_name"));
-                a.setDescription(rs.getString("description"));
-                a.setTime(rs.getString("time"));
-                list.add(a);
-            }
-        }
-
-        return list;
+        case "today":
+        default:
+            dateCondition = "created_at::date = CURRENT_DATE";
+            break;
     }
+
+    String sql = """
+        SELECT activity, created_at
+        FROM activity_log
+        WHERE %s
+        ORDER BY created_at DESC
+        LIMIT 10
+    """.formatted(dateCondition);
+
+    try (Connection conn = DBUtil.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        while (rs.next()) {
+            Activity a = new Activity();
+            a.setActivity(rs.getString("activity"));
+            a.setCreatedAt(rs.getTimestamp("created_at"));
+            list.add(a);
+        }
+
+    } catch (SQLException e) {
+        throw new RuntimeException("Error fetching recent activities", e);
+    }
+
+    return list;
 }
+
+}
+
