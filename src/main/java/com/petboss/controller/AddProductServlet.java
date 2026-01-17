@@ -23,8 +23,7 @@ import java.io.IOException;
 public class AddProductServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    @Inject
-    private CloudinaryService cloudinaryService;
+    private final CloudinaryService cloudinaryService = new CloudinaryService();
 
     /* =========================
        SHOW ADD PRODUCT PAGE
@@ -209,4 +208,5 @@ public class AddProductServlet extends HttpServlet {
 
 
 }
+
 
