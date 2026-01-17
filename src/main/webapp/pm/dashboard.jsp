@@ -120,7 +120,7 @@ html, body {
                   px-4 rounded-full flex items-center gap-3
                   border-2 border-white shadow-md text-sm font-semibold">
             <i class="fas fa-box-open w-5 text-center"></i>
-            <span>Receive Product</span>
+            <span>Receive Order</span>
         </a>
 
         <a href="<%=request.getContextPath()%>/product-qc"
@@ -154,19 +154,19 @@ html, body {
 <!-- ===== STATS ===== -->
 <div class="grid grid-cols-4 gap-6 mb-6">
 
-<div class="bg-[#4FA3A5] text-white p-6 rounded-xl text-center shadow-md">
+<div class="bg-cyan-400 text-white p-6 rounded-xl text-center shadow-md">
     <i class="fas fa-boxes text-2xl mb-2"></i>
     <p class="text-4xl font-bold"><%= request.getAttribute("totalProducts") %></p>
     <p class="text-sm">Products</p>
 </div>
 
-<div class="bg-[#F4A261] text-white p-6 rounded-xl text-center shadow-md">
+<div class="bg-orange-500 text-white p-6 rounded-xl text-center shadow-md">
     <i class="fas fa-users text-2xl mb-2"></i>
     <p class="text-4xl font-bold"><%= request.getAttribute("totalStaff") %></p>
     <p class="text-sm">Staff</p>
 </div>
 
-<div class="bg-[#355070] text-white p-6 rounded-xl text-center shadow-md">
+<div class="bg-sky-800 text-white p-6 rounded-xl text-center shadow-md">
     <i class="fas fa-truck text-2xl mb-2"></i>
     <p class="text-4xl font-bold"><%= request.getAttribute("totalSuppliers") %></p>
     <p class="text-sm">Suppliers</p>
