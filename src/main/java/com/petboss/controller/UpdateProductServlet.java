@@ -4,11 +4,9 @@ import com.petboss.dao.ProductDAO;
 import com.petboss.dao.ProductCategoryDAO;
 import com.petboss.dao.ActivityLogDAO;
 import com.petboss.model.Product;
+import com.petboss.service.CloudinaryService;
 
 import jakarta.servlet.annotation.MultipartConfig;
-import java.io.File;
-import java.nio.file.Paths;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -18,15 +16,17 @@ import java.sql.Date;
 
 @WebServlet("/editProduct")
 @MultipartConfig(
-	    fileSizeThreshold = 1024 * 1024,
-	    maxFileSize = 1024 * 1024 * 5,
-	    maxRequestSize = 1024 * 1024 * 10
-	)
+    fileSizeThreshold = 1024 * 1024,
+    maxFileSize = 1024 * 1024 * 5,
+    maxRequestSize = 1024 * 1024 * 10
+)
 public class UpdateProductServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private static final String UPLOAD_DIR = "C:/petboss/uploads/product";
-    
+
+    // ✅ Cloudinary (NO CDI)
+    private final CloudinaryService cloudinaryService = new CloudinaryService();
+
     private Date parseDateSafe(String dateStr) {
         if (dateStr == null || dateStr.trim().isEmpty()) {
             return null;
@@ -43,45 +43,33 @@ public class UpdateProductServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/login.jsp");
             return;
         }
-        
+
         String staffName = (String) session.getAttribute("staffName");
 
         try {
             String productId = req.getParameter("productId");
             String category  = req.getParameter("category");
 
-            ProductDAO productDAO = new ProductDAO();            
+            ProductDAO productDAO = new ProductDAO();
+
             // 🔹 ambil product lama (UNTUK IMAGE)
             Product oldProduct = productDAO.getProductById(productId);
             if (oldProduct == null) {
                 throw new ServletException("Product not found for ID: " + productId);
             }
-            
+
             // =========================
-            // IMAGE (EDIT / REPLACE)
+            // IMAGE (CLOUDINARY UPDATE)
             // =========================
             Part imagePart = req.getPart("productImage");
-            String imageFileName = oldProduct.getImage(); // default: kekal lama
 
+            // default: guna image lama (URL Cloudinary)
+            String imageUrl = oldProduct.getImage();
+
+            // kalau user upload gambar baru
             if (imagePart != null && imagePart.getSize() > 0) {
-
-                // ❌ delete image lama
-                if (oldProduct.getImage() != null) {
-                    File oldFile = new File(UPLOAD_DIR, oldProduct.getImage());
-                    if (oldFile.exists()) oldFile.delete();
-                }
-
-                // ✔️ rename ikut SKU
-                String original = Paths.get(imagePart.getSubmittedFileName())
-                                       .getFileName().toString();
-                String ext = original.substring(original.lastIndexOf("."));
-
-                imageFileName = productId + ext;
-
-                File dir = new File(UPLOAD_DIR);
-                if (!dir.exists()) dir.mkdirs();
-
-                imagePart.write(UPLOAD_DIR + File.separator + imageFileName);
+                imageUrl =
+                    cloudinaryService.uploadProductImage(imagePart, productId);
             }
 
             // =========================
@@ -90,7 +78,7 @@ public class UpdateProductServlet extends HttpServlet {
             Product p = new Product();
             p.setProductId(productId);
 
-            // 🔥 WAJIB SET
+            // 🔥 WAJIB SET (KEKAL SAMA)
             p.setName(oldProduct.getName());
             p.setBrand(oldProduct.getBrand());
             p.setCategory(oldProduct.getCategory());
@@ -100,7 +88,7 @@ public class UpdateProductServlet extends HttpServlet {
             p.setMinQuantity(Integer.parseInt(req.getParameter("minQuantity")));
             p.setPurchasePrice(Double.parseDouble(req.getParameter("purchasePrice")));
             p.setSellingPrice(Double.parseDouble(req.getParameter("sellingPrice")));
-            p.setImage(imageFileName);
+            p.setImage(imageUrl);
 
             productDAO.updateProduct(p);
 
@@ -110,14 +98,15 @@ public class UpdateProductServlet extends HttpServlet {
             ProductCategoryDAO categoryDAO = new ProductCategoryDAO();
 
             switch (category) {
-            case "PET_MEDICINE":
-                categoryDAO.updatePetMedicine(
-                    productId,
-                    req.getParameter("dosage"),
-                    req.getParameter("prescription"),
-                    parseDateSafe(req.getParameter("expiryDate"))
-                );
-                break;
+
+                case "PET_MEDICINE":
+                    categoryDAO.updatePetMedicine(
+                        productId,
+                        req.getParameter("dosage"),
+                        req.getParameter("prescription"),
+                        parseDateSafe(req.getParameter("expiryDate"))
+                    );
+                    break;
 
                 case "PET_FOOD":
                     categoryDAO.updatePetFood(
