@@ -31,10 +31,11 @@ public class ProductServlet extends HttpServlet {
 
         // 🔐 Role validation
         boolean isAdmin = "Admin".equalsIgnoreCase(role);
-        boolean isPM = "Purchasing Manager".equalsIgnoreCase(role)
-                     || "PURCHASING_MANAGER".equalsIgnoreCase(role);
+        boolean isPM = "Purchasing Manager".equalsIgnoreCase(role);
+        boolean isStaff = "Staff".equalsIgnoreCase(role);
 
-        if (!isAdmin && !isPM) {
+        // ❌ Unauthorized
+        if (!isAdmin && !isPM && !isStaff) {
             resp.sendRedirect(req.getContextPath() + "/unauthorized.jsp");
             return;
         }
@@ -56,7 +57,7 @@ public class ProductServlet extends HttpServlet {
                 products = dao.searchProduct(keyword, category);
             }
 
-            // ✅ AJAX REQUEST → RETURN JSON
+            // ✅ AJAX REQUEST → RETURN JSON (ALL ROLES CAN VIEW)
             if ("true".equals(ajax)) {
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
@@ -82,14 +83,17 @@ public class ProductServlet extends HttpServlet {
                 return;
             }
 
-            // NORMAL PAGE LOAD (FIRST LOAD)
+            // NORMAL PAGE LOAD
             req.setAttribute("products", products);
             req.setAttribute("activeMenu", "product");
 
             if (isAdmin) {
                 req.getRequestDispatcher("/admin/product.jsp").forward(req, resp);
-            } else {
+            } else if (isPM) {
                 req.getRequestDispatcher("/pm/product.jsp").forward(req, resp);
+            } else {
+                // 👇 STAFF (VIEW ONLY)
+                req.getRequestDispatcher("/staff/product.jsp").forward(req, resp);
             }
 
         } catch (Exception e) {
