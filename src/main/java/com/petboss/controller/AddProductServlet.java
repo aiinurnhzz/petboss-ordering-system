@@ -10,9 +10,9 @@ import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
-import java.io.File;
+import jakarta.inject.Inject;
+import com.petboss.service.CloudinaryService;
 import java.io.IOException;
-import java.nio.file.Paths;
 
 @WebServlet("/pm/addProduct")
 @MultipartConfig(
@@ -23,9 +23,8 @@ import java.nio.file.Paths;
 public class AddProductServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-
-    // ✅ Outside Eclipse (SAFE)
-    private static final String UPLOAD_DIR = "C:/petboss/uploads/product";
+    @Inject
+    private CloudinaryService cloudinaryService;
 
     /* =========================
        SHOW ADD PRODUCT PAGE
@@ -100,7 +99,7 @@ public class AddProductServlet extends HttpServlet {
             p.setSellingPrice(Double.parseDouble(req.getParameter("sellingPrice")));
 
          // ===== IMAGE UPLOAD =====
-            Part imagePart = req.getPart("productImage");
+            /* Part imagePart = req.getPart("productImage");
             String imageFileName = null;
 
             if (imagePart != null && imagePart.getSize() > 0) {
@@ -119,9 +118,19 @@ public class AddProductServlet extends HttpServlet {
                 imagePart.write(UPLOAD_DIR + File.separator + imageFileName);
             }
 
-            p.setImage(imageFileName);
+            p.setImage(imageFileName); */
 
-
+            // ===== IMAGE UPLOAD (CLOUDINARY) =====
+            Part imagePart = req.getPart("productImage");
+            
+            if (imagePart != null && imagePart.getSize() > 0) {
+            
+                String imageUrl =
+                    cloudinaryService.uploadProductImage(imagePart, productId);
+            
+                p.setImage(imageUrl);
+            }
+       
             // ===== SAVE PRODUCT (SUPERCLASS) =====
             productDAO.addProduct(p);
 
@@ -200,3 +209,4 @@ public class AddProductServlet extends HttpServlet {
 
 
 }
+
