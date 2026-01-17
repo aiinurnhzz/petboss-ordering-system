@@ -49,48 +49,44 @@ public class DashboardDAO {
 
     public List<Activity> getRecentActivities(String period) throws Exception {
 
-    List<Activity> list = new ArrayList<>();
+        List<Activity> list = new ArrayList<>();
 
-    String condition;
+        String condition;
 
-    switch (period) {
+        switch (period) {
+            case "week":
+                condition = "created_at >= TRUNC(SYSDATE) - 7";
+                break;
 
-        case "week":
-            // last 7 days
-            condition = "created_at >= CURRENT_DATE - INTERVAL '7 days'";
-            break;
+            case "month":
+                condition = "created_at >= ADD_MONTHS(TRUNC(SYSDATE), -1)";
+                break;
 
-        case "month":
-            // last 1 month
-            condition = "created_at >= CURRENT_DATE - INTERVAL '1 month'";
-            break;
-
-        default: // today
-            condition = "created_at::date = CURRENT_DATE";
-    }
-
-    String sql =
-        "SELECT staff_name, " +
-        "       description, " +
-        "       TO_CHAR(created_at, 'DD Mon YYYY HH12:MI AM') AS time " +
-        "FROM activity_log " +
-        "WHERE " + condition + " " +
-        "ORDER BY created_at DESC";
-
-    try (Connection con = DBConnection.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
-
-        while (rs.next()) {
-            Activity a = new Activity();
-            a.setStaffName(rs.getString("staff_name"));
-            a.setDescription(rs.getString("description"));
-            a.setTime(rs.getString("time"));
-            list.add(a);
+            default: // today
+                condition = "TRUNC(created_at) = TRUNC(SYSDATE)";
         }
+
+        String sql =
+            "SELECT staff_name, " +
+            "       description, " +
+            "       TO_CHAR(created_at,'DD Mon YYYY HH:MI AM') AS time " +
+            "FROM activity_log " +
+            "WHERE " + condition + " " +   // 🔥 SPACE PENTING
+            "ORDER BY created_at DESC";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Activity a = new Activity();
+                a.setStaffName(rs.getString("staff_name"));
+                a.setDescription(rs.getString("description"));
+                a.setTime(rs.getString("time"));
+                list.add(a);
+            }
+        }
+
+        return list;
     }
-
-    return list;
 }
-}
-
