@@ -29,12 +29,13 @@ public class SupplierServlet extends HttpServlet {
 
         String role = String.valueOf(session.getAttribute("role"));
 
-        // 🔐 Role validation (ADMIN + PM)
+        // 🔐 Role validation
         boolean isAdmin = "Admin".equalsIgnoreCase(role);
         boolean isPM = "Purchasing Manager".equalsIgnoreCase(role)
                      || "PURCHASING_MANAGER".equalsIgnoreCase(role);
+        boolean isStaff = "Staff".equalsIgnoreCase(role);
 
-        if (!isAdmin && !isPM) {
+        if (!isAdmin && !isPM && !isStaff) {
             resp.sendRedirect(req.getContextPath() + "/unauthorized.jsp");
             return;
         }
@@ -54,7 +55,7 @@ public class SupplierServlet extends HttpServlet {
                 suppliers = dao.searchSupplier(keyword);
             }
 
-            // ✅ AJAX REQUEST → RETURN JSON
+            // ✅ AJAX REQUEST → RETURN JSON (ALL ROLES VIEW)
             if ("true".equals(ajax)) {
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
@@ -71,9 +72,7 @@ public class SupplierServlet extends HttpServlet {
                         .append("\"address\":\"").append(s.getAddress()).append("\"")
                         .append("}");
 
-                    if (i < suppliers.size() - 1) {
-                        json.append(",");
-                    }
+                    if (i < suppliers.size() - 1) json.append(",");
                 }
                 json.append("]");
 
@@ -87,8 +86,11 @@ public class SupplierServlet extends HttpServlet {
 
             if (isAdmin) {
                 req.getRequestDispatcher("/admin/supplier.jsp").forward(req, resp);
-            } else {
+            } else if (isPM) {
                 req.getRequestDispatcher("/pm/supplier.jsp").forward(req, resp);
+            } else {
+                // 👇 STAFF VIEW ONLY
+                req.getRequestDispatcher("/staff/supplier.jsp").forward(req, resp);
             }
 
         } catch (Exception e) {
@@ -96,3 +98,4 @@ public class SupplierServlet extends HttpServlet {
         }
     }
 }
+
