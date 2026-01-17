@@ -14,7 +14,13 @@
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     if (order == null) {
-        response.sendRedirect(request.getContextPath() + "/receive-order?tab=completed");
+%>
+        <h3>No order data found</h3>
+        <p>No receiving record is available yet.</p>
+        <a href="<%=request.getContextPath()%>/receive-order">
+            Back to Receive Orders
+        </a>
+<%
         return;
     }
 %>
@@ -207,3 +213,4 @@ td {
 </div>
 </body>
 </html>
+
