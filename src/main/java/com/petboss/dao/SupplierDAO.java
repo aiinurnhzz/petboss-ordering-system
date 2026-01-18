@@ -131,28 +131,31 @@ public class SupplierDAO {
     }
 
     /* ===============================
-       AUTO GENERATE SUPPLIER ID
+       AUTO GENERATE SUPPLIER ID (PostgreSQL)
        =============================== */
     public String generateSupplierId() throws Exception {
-
-        String sql =
-            "SELECT 'SUP' || LPAD(" +
-            "NVL(MAX(TO_NUMBER(SUBSTR(supplier_id, 4))), 0) + 1, 3, '0')" +
-            " FROM supplier";
-
+    
+        String sql = """
+            SELECT 'SUP' || LPAD(
+                (COALESCE(MAX(SUBSTRING(supplier_id, 4)::INTEGER), 0) + 1)::TEXT,
+                3,
+                '0'
+            )
+            FROM supplier
+        """;
+    
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-
+    
             if (rs.next()) {
                 return rs.getString(1);
             }
         }
-
-        return "SUP001"; // fallback (jarang berlaku)
-    }
-
     
+        return "SUP001"; // fallback
+    }
+ 
     public int getTotalSuppliers() throws Exception {
         String sql = "SELECT COUNT(*) FROM supplier";
         try (Connection conn = DBConnection.getConnection();
@@ -163,3 +166,4 @@ public class SupplierDAO {
     }
 
 }
+
