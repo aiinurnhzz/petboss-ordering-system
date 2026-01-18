@@ -14,48 +14,51 @@ public class ReceiveDAO {
     // ===============================
     public List<OrderItem> getOrderItems(String orderId) {
 
-        List<OrderItem> list = new ArrayList<>();
+    List<OrderItem> list = new ArrayList<>();
 
+    String sql = """
         SELECT
             od.order_detail_id,
             od.product_id,
             p.name AS product_name,
-            od.quantity,
-            COALESCE(SUM(r.quantity_received), 0) AS received
+            od.quantity AS quantity_ordered,
+            COALESCE(SUM(r.quantity_received), 0) AS received_qty
         FROM order_detail od
-        JOIN product p ON p.product_id = od.product_id
-        LEFT JOIN receive r ON r.order_detail_id = od.order_detail_id
+        JOIN product p
+            ON p.product_id = od.product_id
+        LEFT JOIN receive r
+            ON r.order_detail_id = od.order_detail_id
         WHERE od.order_id = ?
         GROUP BY
             od.order_detail_id,
             od.product_id,
             p.name,
             od.quantity
-        ORDER BY od.order_detail_id;
+        ORDER BY od.order_detail_id
+    """;
 
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+    try (Connection con = DBConnection.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setString(1, orderId);
-            ResultSet rs = ps.executeQuery();
+        ps.setString(1, orderId);
+        ResultSet rs = ps.executeQuery();
 
-            while (rs.next()) {
-                OrderItem i = new OrderItem();
-                i.setOrderDetailId(rs.getInt("orderdetail_id"));
-                i.setProductId(rs.getString("product_id"));
-                i.setProductName(rs.getString("product_name"));
-                i.setQuantity(rs.getInt("quantity_ordered"));
-                i.setReceived(rs.getInt("received_qty"));
-                list.add(i);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        while (rs.next()) {
+            OrderItem i = new OrderItem();
+            i.setOrderDetailId(rs.getInt("order_detail_id"));
+            i.setProductId(rs.getString("product_id"));
+            i.setProductName(rs.getString("product_name"));
+            i.setQuantity(rs.getInt("quantity_ordered"));
+            i.setReceived(rs.getInt("received_qty"));
+            list.add(i);
         }
 
-        return list;
+    } catch (Exception e) {
+        e.printStackTrace();
     }
 
+    return list;
+}
     
     private int getNextBatchSequence(String productId) {
 
@@ -222,4 +225,5 @@ public class ReceiveDAO {
     }
 
 }
+
 
