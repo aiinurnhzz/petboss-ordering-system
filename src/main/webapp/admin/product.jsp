@@ -1,27 +1,21 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ page session="true"%>
-<%@ page import="java.util.*"%>
-<%@ page import="com.petboss.model.Product"%>
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page session="true" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.petboss.model.Staff" %>
 
 <%
-String staffId = (String) session.getAttribute("staffId");
-if (staffId == null) {
-    response.sendRedirect(request.getContextPath() + "/login.jsp");
-    return;
-}
-
-List<Product> products = (List<Product>) request.getAttribute("products");
+    List<Staff> staffList = (List<Staff>) request.getAttribute("staffList");
 %>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Admin - Product</title>
+<title>Staff</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet"
- href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
 html, body {
@@ -170,102 +164,152 @@ td {
 			</div>
 		</aside>
 
-<!-- ===== CONTENT ===== -->
+<!-- ===== MAIN CONTENT ===== -->
 <main class="flex-1 p-8 overflow-y-auto">
 
-<div class="bg-white border-2 border-[#009a49] rounded-xl p-6 shadow">
+<div class="bg-white border-2 border-[#009a49] rounded-2xl p-6 shadow">
 
-<h2 class="text-2xl font-bold text-cyan-900 mb-4">PRODUCT LIST</h2>
-<hr class="border-green-600 mb-6">
+    <!-- TITLE ROW -->
+	<div class="flex justify-between items-center">
+	    <h2 class="text-3xl font-black text-cyan-900">STAFF</h2>
+	
+	    <a href="<%=request.getContextPath()%>/registerStaff"
+	       class="bg-green-600 text-white px-6 py-3 rounded-full font-semibold">
+	        + Add Staff
+	    </a>
+	</div>
+	
+	<!-- ✅ GARIS PANJANG -->
+	<hr class="border-t-2 border-green-600 my-6">
+	
+    <!-- SEARCH + FILTER -->
+    <form class="search-form">
 
-<!-- ===== SEARCH (SERVER SIDE) ===== -->
-<form method="get" action="<%=request.getContextPath()%>/product"
-      class="flex gap-4 mb-6">
+        <!-- SEARCH -->
+        <div class="search-box">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search staff by name or ID"
+                class="search-input">
+            <i class="fas fa-search search-icon"></i>
+        </div>
 
-    <input type="text" name="keyword"
-           placeholder="Search product..."
-           class="border-2 border-[#009a49] rounded px-4 py-2 w-72">
+        <!-- ROLE FILTER -->
+        <div class="filter-box">
+            <div class="filter-container">
+                <div class="filter-icon">
+                    <i class="fas fa-filter"></i>
+                </div>
 
-    <select name="category"
-            class="border-2 border-[#009a49] rounded px-3 py-2">
-        <option value="">All Category</option>
-        <option value="PET_FOOD">Pet Food</option>
-        <option value="PET_MEDICINE">Pet Medicine</option>
-        <option value="PET_CARE">Pet Care</option>
-        <option value="PET_ACCESSORY">Pet Accessory</option>
-    </select>
+                <select id="roleFilter" class="filter-select">
+                    <option value="">All Roles</option>
+                    <option>Admin</option>
+                    <option>Purchasing Manager</option>
+                    <option>Staff</option>
+                </select>
 
-    <button class="bg-[#009a49] text-white px-6 rounded">
-        Search
-    </button>
-</form>
+                <i class="fas fa-caret-down filter-arrow"></i>
+            </div>
+        </div>
 
-<!-- ===== TABLE ===== -->
-<table class="w-full border-collapse">
-<thead>
-<tr>
-    <th>Image</th>
-    <th>Product ID</th>
-    <th>Name</th>
-    <th>Category</th>
-    <th>Quantity</th>
-    <th>Selling Price (RM)</th>
-    <th>Action</th>
-</tr>
-</thead>
+        <!-- STATUS FILTER -->
+        <div class="filter-box">
+            <div class="filter-container">
+                <div class="filter-icon">
+                    <i class="fas fa-filter"></i>
+                </div>
 
-<tbody>
+                <select id="statusFilter" class="filter-select">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
 
-<%
-if (products != null && !products.isEmpty()) {
-    for (Product p : products) {
-%>
-<tr>
+                <i class="fas fa-caret-down filter-arrow"></i>
+            </div>
+        </div>
 
-<td>
-<%
-if (p.getImage() != null) {
-%>
-<img src="<%=request.getContextPath()%>/product-image?file=<%=p.getImage()%>"
-     class="h-10 mx-auto">
-<%
-} else {
-%> - <%
-}
-%>
-</td>
+    </form>
 
-<td><%=p.getProductId()%></td>
-<td><%=p.getName()%></td>
-<td><%=p.getCategory()%></td>
-<td><%=p.getQuantity()%></td>
-<td>RM <%=String.format("%.2f", p.getSellingPrice())%></td>
+    <!-- TABLE -->
+    <div class="overflow-x-hidden">
+        <table class="w-full border-collapse staff-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Staff ID</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
 
-<td>
-<a href="<%=request.getContextPath()%>/product?action=view&id=<%=p.getProductId()%>"
-   class="text-blue-600 hover:underline">
-   <i class="fas fa-eye"></i> View
-</a>
-</td>
-
-</tr>
-<%
-}
-} else {
-%>
-<tr>
-<td colspan="7" class="py-6 text-gray-500">No product found</td>
-</tr>
-<%
-}
-%>
-
-</tbody>
-</table>
+            <tbody id="staffTable">
+            <% if (staffList != null && !staffList.isEmpty()) {
+                   for (Staff s : staffList) { %>
+                <tr class="staff-row" data-status="<%= s.getStatus() %>">
+                    <td><%= s.getFullName() %></td>
+                    <td><%= s.getStaffId() %></td>
+                    <td class="staff-role"><%= s.getRole() %></td>
+                    <td>
+                        <div class="flex justify-center gap-4">
+                            <a href="<%=request.getContextPath()%>/viewStaff?staffId=<%= s.getStaffId() %>"
+                               class="hover:scale-150 transition">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="<%=request.getContextPath()%>/updateStaff?staffId=<%= s.getStaffId() %>"
+                               class="hover:scale-150 transition">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            <% } } else { %>
+                <tr>
+                    <td colspan="4" class="text-center text-gray-500 py-10">
+                        No staff found
+                    </td>
+                </tr>
+            <% } %>
+            </tbody>
+        </table>
+    </div>
 
 </div>
 </main>
+
 </div>
+
+<!-- ===== SCRIPT (UNCHANGED) ===== -->
+<script>
+const searchInput = document.getElementById("searchInput");
+const roleFilter = document.getElementById("roleFilter");
+const statusFilter = document.getElementById("statusFilter");
+const rows = document.querySelectorAll(".staff-row");
+
+function filterStaff() {
+    const search = searchInput.value.toLowerCase();
+    const role = roleFilter.value.toLowerCase();
+    const status = statusFilter.value.toLowerCase();
+
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const rowRole = row.querySelector(".staff-role").innerText.toLowerCase();
+        const rowStatus = row.dataset.status.toLowerCase();
+
+        row.style.display =
+            text.includes(search) &&
+            (role === "" || rowRole === role) &&
+            (status === "" || rowStatus === status)
+                ? ""
+                : "none";
+    });
+}
+
+searchInput.addEventListener("keyup", filterStaff);
+roleFilter.addEventListener("change", filterStaff);
+statusFilter.addEventListener("change", filterStaff);
+</script>
 
 </body>
 </html>
