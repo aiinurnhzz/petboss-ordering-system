@@ -312,20 +312,263 @@ String imgSrc = isUrl
 </div>
 
 <script>
-function openViewModal(id,name,cat,brand,qty,min,buy,sell,img){
-document.getElementById("viewName").value=name;
-document.getElementById("viewCategory").value=cat;
-let imgSrc = img && img.startsWith("http")
-    ? img
-    : "<%=request.getContextPath()%>/images/products/" + img;
-document.getElementById("viewImg").src = imgSrc;
-document.getElementById("viewModal").classList.remove("hidden");
+/* ===============================
+   VIEW MODAL
+   =============================== */
+function openViewModal(id, name, cat, brand, qty, min, buy, sell, img) {
+
+    document.getElementById("viewId").value = id;
+    document.getElementById("viewName").value = name;
+    document.getElementById("viewCategory").value = cat;
+    document.getElementById("viewBrand").value = brand;
+    document.getElementById("viewQty").value = qty;
+    document.getElementById("viewMin").value = min;
+    document.getElementById("viewBuy").value = buy;
+    document.getElementById("viewSell").value = sell;
+
+    document.getElementById("viewImg").src = img
+        ? "<%=request.getContextPath()%>/product-image?file=" + img
+        : "<%=request.getContextPath()%>/images/default-product.png";
+
+    document.getElementById("viewModal").classList.remove("hidden");
+
+    loadCategoryDetails(id, cat);
 }
-function closeViewModal(){
-document.getElementById("viewModal").classList.add("hidden");
+
+function closeViewModal() {
+    document.getElementById("viewModal").classList.add("hidden");
 }
+
+function loadCategoryDetails(productId, category) {
+
+    fetch("<%=request.getContextPath()%>/product-category?productId=" + productId + "&category=" + category)
+    .then(res => res.json())
+    .then(data => {
+
+        document.getElementById("viewCategorySection").classList.add("hidden");
+        document.querySelectorAll(
+            "#view-cat-medicine, #view-cat-food, #view-cat-care, #view-cat-accessory"
+        ).forEach(div => div.classList.add("hidden"));
+
+        if (!data || Object.keys(data).length === 0) return;
+
+        document.getElementById("viewCategorySection").classList.remove("hidden");
+
+        if (category === "PET_MEDICINE") {
+            document.getElementById("viewMedDosage").value = data.dosage || "-";
+            document.getElementById("viewMedPrescription").value = data.prescription || "-";
+            document.getElementById("viewMedExpiry").value = formatDate(data.expiry_date);
+            document.getElementById("view-cat-medicine").classList.remove("hidden");
+        }
+
+        if (category === "PET_FOOD") {
+            document.getElementById("viewFoodWeight").value = data.weight || "-";
+            document.getElementById("viewFoodExpiry").value = formatDate(data.expiry_date);
+            document.getElementById("view-cat-food").classList.remove("hidden");
+        }
+
+        if (category === "PET_CARE") {
+            document.getElementById("viewCareType").value = data.type || "-";
+            document.getElementById("viewCareExpiry").value = formatDate(data.expiry_date);
+            document.getElementById("view-cat-care").classList.remove("hidden");
+        }
+
+        if (category === "PET_ACCESSORY") {
+            document.getElementById("viewAccMaterial").value = data.material || "-";
+            document.getElementById("view-cat-accessory").classList.remove("hidden");
+        }
+    });
+}
+
+function formatDate(dateStr) {
+    return dateStr ? dateStr.split(" ")[0] : "-";
+}
+
+/* ===============================
+   SEARCH & FILTER (AJAX)
+   =============================== */
+const searchInput = document.getElementById("searchInput");
+const categoryFilter = document.getElementById("categoryFilter");
+const tableBody = document.querySelector("tbody");
+const contextPath = "<%=request.getContextPath()%>";
+let typingTimer;
+
+searchInput.addEventListener("input", () => {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(loadProducts, 400);
+});
+
+categoryFilter.addEventListener("change", loadProducts);
+
+function loadProducts() {
+
+    fetch(
+        contextPath + "/product?ajax=true"
+        + "&keyword=" + encodeURIComponent(searchInput.value || "")
+        + "&category=" + encodeURIComponent(categoryFilter.value || "")
+    )
+    .then(res => res.json())
+    .then(data => {
+
+        tableBody.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            tableBody.innerHTML =
+                "<tr><td colspan='7' class='text-center text-gray-500 p-4'>No product found</td></tr>";
+            paginateTable();
+            return;
+        }
+
+        data.forEach(p => {
+
+            const imgHtml = p.img
+                ? "<img src='" + contextPath + "/product-image?file=" + p.img + "' class='h-10 mx-auto'>"
+                : "-";
+
+            tableBody.insertAdjacentHTML("beforeend",
+                "<tr>" +
+                "<td>" + imgHtml + "</td>" +
+                "<td>" + p.id + "</td>" +
+                "<td>" + p.name + "</td>" +
+                "<td>" + p.qty + "</td>" +
+                "<td>" + p.category + "</td>" +
+                "<td>RM " + Number(p.sell).toFixed(2) + "</td>" +
+                "<td class='text-center'>" +
+                "<i class='fas fa-eye cursor-pointer mr-4' onclick=\"openViewModal('" +
+                p.id + "','" + p.name + "','" + p.category + "','" + p.brand + "','" +
+                p.qty + "','" + (p.min || 0) + "','" + p.buy + "','" + p.sell + "','" +
+                (p.img || "") + "')\"></i>" +
+                "<i class='fas fa-pencil-alt cursor-pointer' onclick=\"openEditModal('" +
+                p.id + "','" + p.name + "','" + p.category + "','" + p.brand + "','" +
+                p.qty + "','" + (p.min || 0) + "','" + p.buy + "','" + p.sell + "','" +
+                (p.img || "") + "')\"></i>" +
+                "</td></tr>"
+            );
+        });
+
+        currentPage = 1;
+        paginateTable();
+    });
+}
+
+/* ===============================
+ADVANCED PAGINATION (LIKE DESIGN)
+=============================== */
+
+let rowsPerPage = 10;
+let currentPage = 1;
+
+const rowsPerPageSelect = document.getElementById("rowsPerPageSelect");
+
+rowsPerPageSelect.addEventListener("change", () => {
+ rowsPerPage = Number(rowsPerPageSelect.value);
+ currentPage = 1;
+ paginateTable();
+});
+
+function paginateTable() {
+
+ const rows = document.querySelectorAll("tbody tr");
+ const pagination = document.getElementById("pagination");
+ pagination.innerHTML = "";
+
+ if (rows.length === 0) return;
+
+ const totalPages = Math.ceil(rows.length / rowsPerPage);
+
+ // hide all rows
+ rows.forEach(r => r.style.display = "none");
+
+ // show current page rows
+ rows.forEach((row, index) => {
+     if (
+         index >= (currentPage - 1) * rowsPerPage &&
+         index < currentPage * rowsPerPage
+     ) {
+         row.style.display = "";
+     }
+ });
+
+ /* ===== PREV BUTTON ===== */
+ const prevBtn = document.createElement("button");
+ prevBtn.innerHTML = "&#8249;";
+ prevBtn.disabled = currentPage === 1;
+ prevBtn.className =
+     "px-3 py-1 rounded-full " +
+     (prevBtn.disabled
+         ? "text-gray-400 cursor-not-allowed"
+         : "hover:bg-white");
+
+ prevBtn.onclick = () => {
+     currentPage--;
+     paginateTable();
+ };
+ pagination.appendChild(prevBtn);
+
+ /* ===== PAGE NUMBERS ===== */
+ const maxVisible = 5;
+ let start = Math.max(1, currentPage - 2);
+ let end = Math.min(totalPages, start + maxVisible - 1);
+
+ if (start > 1) {
+     addPageButton(1);
+     addEllipsis();
+ }
+
+ for (let i = start; i <= end; i++) {
+     addPageButton(i);
+ }
+
+ if (end < totalPages) {
+     addEllipsis();
+     addPageButton(totalPages);
+ }
+
+ /* ===== NEXT BUTTON ===== */
+ const nextBtn = document.createElement("button");
+ nextBtn.innerHTML = "&#8250;";
+ nextBtn.disabled = currentPage === totalPages;
+ nextBtn.className =
+     "px-3 py-1 rounded-full " +
+     (nextBtn.disabled
+         ? "text-gray-400 cursor-not-allowed"
+         : "hover:bg-white");
+
+ nextBtn.onclick = () => {
+     currentPage++;
+     paginateTable();
+ };
+ pagination.appendChild(nextBtn);
+
+ /* ===== HELPERS ===== */
+ function addPageButton(page) {
+     const btn = document.createElement("button");
+     btn.innerText = page;
+     btn.className =
+         page === currentPage
+             ? "px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 font-bold"
+             : "px-3 py-1 rounded-full hover:bg-white";
+
+     btn.onclick = () => {
+         currentPage = page;
+         paginateTable();
+     };
+     pagination.appendChild(btn);
+ }
+
+ function addEllipsis() {
+     const span = document.createElement("span");
+     span.innerText = "...";
+     span.className = "px-2 text-gray-400";
+     pagination.appendChild(span);
+ }
+}
+
+/* ===== INITIAL LOAD ===== */
+document.addEventListener("DOMContentLoaded", paginateTable);
 </script>
 
 </body>
 </html>
+
 
