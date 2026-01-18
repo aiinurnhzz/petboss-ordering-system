@@ -143,11 +143,10 @@ public class ReceiveOrderDAO {
     // ===============================
     // AUTO UPDATE ORDER STATUS
     // ===============================
-    public void updateOrderStatus(String orderId) {
-
+   public void updateOrderStatus(String orderId) {
         String sql = """
             UPDATE orders o
-            SET o.order_status =
+            SET order_status =
                 CASE
                     WHEN NOT EXISTS (
                         SELECT 1
@@ -156,22 +155,23 @@ public class ReceiveOrderDAO {
                             ON d.orderdetail_id = r.orderdetail_id
                         WHERE d.order_id = o.order_id
                         GROUP BY d.orderdetail_id, d.quantity_ordered
-                        HAVING NVL(SUM(r.quantity_received),0) < d.quantity_ordered
+                        HAVING COALESCE(SUM(r.quantity_received), 0) < d.quantity_ordered
                     )
                     THEN 'COMPLETED'
                     ELSE 'PARTIALLY_RECEIVED'
                 END
             WHERE o.order_id = ?
         """;
-
+    
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-
+    
             ps.setString(1, orderId);
             ps.executeUpdate();
-
+    
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 }
+
