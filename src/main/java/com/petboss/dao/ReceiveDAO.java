@@ -17,24 +17,24 @@ public class ReceiveDAO {
     List<OrderItem> list = new ArrayList<>();
 
     String sql = """
-        SELECT
-            od.orderdetail_id,
-            od.product_id,
-            p.name AS product_name,
-            od.quantity AS quantity_ordered,
-            COALESCE(SUM(r.quantity_received), 0) AS received_qty
-        FROM orderdetail od
-        JOIN product p
-            ON p.product_id = od.product_id
-        LEFT JOIN receive r
-            ON r.orderdetail_id = od.orderdetail_id
-        WHERE od.order_id = ?
-        GROUP BY
-            od.orderdetail_id,
-            od.product_id,
-            p.name,
-            od.quantity
-        ORDER BY od.orderdetail_id
+    SELECT
+        od.orderdetail_id,
+        od.product_id,
+        p.name AS product_name,
+        od.quantity_ordered,
+        COALESCE(SUM(r.quantity_received), 0) AS received_qty
+    FROM orderdetail od
+    JOIN product p
+        ON p.product_id = od.product_id
+    LEFT JOIN receive r
+        ON r.orderdetail_id = od.orderdetail_id
+    WHERE od.order_id = ?
+    GROUP BY
+        od.orderdetail_id,
+        od.product_id,
+        p.name,
+        od.quantity_ordered
+    ORDER BY od.orderdetail_id
     """;
 
     try (Connection con = DBConnection.getConnection();
@@ -227,6 +227,7 @@ public class ReceiveDAO {
     }
 
 }
+
 
 
 
