@@ -216,89 +216,130 @@ input:disabled {
 		</aside>
 
 <!-- ===== MAIN ===== -->
-<main class="flex-1 p-8 overflow-y-auto">
+		<main class="flex-1 p-8 overflow-y-auto">
 
-<div class="bg-white border-2 border-[#009a49] rounded-2xl p-6 shadow">
+			<div
+				class="bg-white border-2 border-[#009a49] rounded-2xl p-6 shadow">
 
-<h2 class="text-3xl font-black text-cyan-900 mb-4">PRODUCT</h2>
+				<!-- TITLE ROW -->
+				<div class="flex justify-between items-center mb-4">
+					<h2 class="text-3xl font-black text-cyan-900">PRODUCT</h2>
 
-<form method="get" action="<%=request.getContextPath()%>/product" class="search-form">
+					<a href="<%=request.getContextPath()%>/pm/addProduct"
+						class="bg-green-600 hover:bg-green-700
+                  text-white px-6 py-3 rounded-full font-semibold
+                  shadow-md transition">
+						+ Add Product </a>
+				</div>
 
-<div class="search-box">
-<input type="text" name="keyword"
- value="<%=request.getParameter("keyword")!=null?request.getParameter("keyword"):""%>"
- placeholder="Search product by ID or Name"
- class="search-input">
-<i class="fas fa-search search-icon"></i>
-</div>
+				<!-- DIVIDER -->
+				<hr class="border-green-600 mb-6">
 
-<div class="filter-box">
-<div class="filter-container">
-<div class="filter-icon"><i class="fas fa-filter"></i></div>
-<select name="category" class="filter-select">
-<option value="">All Category</option>
-<option value="PET_FOOD" <%= "PET_FOOD".equals(request.getParameter("category"))?"selected":""%>>Pet Food</option>
-<option value="PET_MEDICINE" <%= "PET_MEDICINE".equals(request.getParameter("category"))?"selected":""%>>Pet Medicine</option>
-<option value="PET_CARE" <%= "PET_CARE".equals(request.getParameter("category"))?"selected":""%>>Pet Care</option>
-<option value="PET_ACCESSORY" <%= "PET_ACCESSORY".equals(request.getParameter("category"))?"selected":""%>>Pet Accessory</option>
-</select>
-</div>
-</div>
+				<!-- SEARCH + FILTER (SAME STYLE AS ORDER) -->
+				<!-- SEARCH -->
+				<form class="search-form">
 
-<button class="bg-green-600 text-white px-6 rounded-full font-semibold">Search</button>
-</form>
+					<div class="search-box">
+						<input type="text" id="searchInput"
+							placeholder="Search Supplier by ID, Name or Email"
+							class="search-input"> <i
+							class="fas fa-search search-icon"></i>
+					</div>
 
-<table class="w-full border-collapse mt-6">
-<thead>
-<tr>
-<th>Image</th><th>ID</th><th>Name</th><th>Qty</th><th>Category</th><th>Price</th><th>Action</th>
-</tr>
-</thead>
+					<!-- FILTER -->
+					<div class="filter-box">
+						<div class="filter-container">
 
-<tbody>
-<% if(products!=null && !products.isEmpty()){
-for(Product p:products){ %>
-<tr>
-<td>
-<%
-String img = p.getImage();
-boolean isUrl = img != null && img.startsWith("http");
-String imgSrc = isUrl
-    ? img
-    : request.getContextPath() + "/images/products/" + img;
-%>
+							<div class="filter-icon">
+								<i class="fas fa-filter"></i>
+							</div>
 
-<img src="<%=imgSrc%>"
-     class="h-10 mx-auto"
-     onerror="this.src='<%=request.getContextPath()%>/images/default-product.png'">
-</td>
-<td><%=p.getProductId()%></td>
-<td><%=p.getName()%></td>
-<td><%=p.getQuantity()%></td>
-<td><%=p.getCategory()%></td>
-<td>RM <%=String.format("%.2f",p.getSellingPrice())%></td>
-<td>
-<i class="fas fa-eye cursor-pointer"
- onclick="openViewModal('<%=p.getProductId()%>',
- '<%=p.getName()%>',
- '<%=p.getCategory()%>',
- '<%=p.getBrand()%>',
- <%=p.getQuantity()%>,
- <%=p.getMinQuantity()%>,
- <%=p.getPurchasePrice()%>,
- <%=p.getSellingPrice()%>,
- '<%=p.getImage()%>')"></i>
-</td>
-</tr>
-<% }} else { %>
-<tr><td colspan="7" class="p-6 text-center text-gray-500">No products</td></tr>
-<% } %>
-</tbody>
-</table>
+							<select id="categoryFilter" class="filter-select">
+								<option value="">All Category</option>
+								<option value="PET_FOOD">Pet Food</option>
+								<option value="PET_MEDICINE">Pet Medicine</option>
+								<option value="PET_CARE">Pet Care</option>
+								<option value="PET_ACCESSORY">Pet Accessory</option>
+							</select> <i class="fas fa-caret-down filter-arrow"></i>
+						</div>
+					</div>
 
-</div>
-</main>
-</div>
+				</form>
+
+				<!-- TABLE -->
+				<div class="overflow-x-hidden">
+					<table class="w-full border-collapse">
+						<thead>
+							<tr>
+								<th class="border p-2">Image</th>
+								<th class="border p-2">Product ID</th>
+								<th class="border p-2">Name</th>
+								<th class="border p-2">Quantity</th>
+								<th class="border p-2">Category</th>
+								<th class="border p-2">Selling Price (RM)</th>
+								<th class="border p-2">Action</th>
+							</tr>
+						</thead>
+
+						<tbody>
+							<%
+							if (products != null && !products.isEmpty()) {
+								for (Product p : products) {
+							%>
+
+							<tr class="product-row">
+
+								<!-- IMAGE -->
+								<td class="border p-2 text-center">
+									<%
+									if (p.getImage() != null && !p.getImage().isEmpty()) {
+									%>
+									    <img src="<%=p.getImage()%>" class="h-10 mx-auto">
+									<%
+									} else {
+									%>
+									    —
+									<%
+									}
+									%>
+								</td>
+
+								<td class="border p-2"><%=p.getProductId()%></td>
+								<td class="border p-2 text-center"><%=p.getName()%></td>
+
+								<td class="border p-2 text-center font-semibold"><%=p.getQuantity()%>
+								</td>
+
+								<td class="border p-2"><%=p.getCategory()%></td>
+
+								<td class="border p-2 text-center">RM <%=String.format("%.2f", p.getSellingPrice())%>
+								</td>
+
+								<!-- ACTION -->
+								<td class="border p-2 text-center">
+									<div class="flex justify-center items-center gap-4">
+
+										<!-- VIEW -->
+										<div class="relative group">
+											<i
+												class="fas fa-eye text-black text-lg hover:scale-150 transition cursor-pointer"
+												onclick="openViewModal(
+                       '<%=p.getProductId()%>',
+                       '<%=p.getName()%>',
+                       '<%=p.getCategory()%>',
+                       '<%=p.getBrand()%>',
+                       <%=p.getQuantity()%>,
+                       <%=p.getMinQuantity()%>,
+                       <%=p.getPurchasePrice()%>,
+                       <%=p.getSellingPrice()%>,
+                       '<%=p.getImage()%>'
+                   )"></i>
+
+											<span
+												class="absolute bottom-full mb-2 hidden group-hover:block
+                             bg-black text-white text-[10px] px-2 py-1 rounded">
+												View </span>
+										</div>
 
 <!-- ✅ FIX: VIEW MODAL DIPINDAH KE SINI (LUAR TABLE) -->
 <div id="viewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
@@ -570,5 +611,6 @@ document.addEventListener("DOMContentLoaded", paginateTable);
 
 </body>
 </html>
+
 
 
