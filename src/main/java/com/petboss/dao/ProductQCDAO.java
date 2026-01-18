@@ -106,6 +106,65 @@ public class ProductQCDAO {
     }
 
     /* ===============================
+   GET QC DETAIL BY ID
+   =============================== */
+    public Map<String,String> getQCById(String qcId) {
+    
+        Map<String,String> qc = new HashMap<>();
+    
+        String sql = """
+            SELECT
+                qc.qc_id,
+                qc.batch_number,
+                p.name AS product_name,
+                o.order_id,
+                s.supplier_name,
+                r.quantity_received,
+                qc.quantity_damaged,
+                qc.quantity_return,
+                qc.qc_condition,
+                qc.remarks,
+                TO_CHAR(qc.qc_date,'YYYY-MM-DD') AS qc_date,
+                st.full_name AS staff_name
+            FROM qualitycheck qc
+            JOIN receive r ON qc.batch_number = r.batch_number
+            JOIN orderdetail od ON r.orderdetail_id = od.orderdetail_id
+            JOIN orders o ON od.order_id = o.order_id
+            JOIN supplier s ON o.supplier_id = s.supplier_id
+            JOIN product p ON od.product_id = p.product_id
+            JOIN staff st ON qc.staff_id = st.staff_id
+            WHERE qc.qc_id = ?
+        """;
+    
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+    
+            ps.setString(1, qcId);
+            ResultSet rs = ps.executeQuery();
+    
+            if (rs.next()) {
+                qc.put("qcId", rs.getString("qc_id"));
+                qc.put("batch", rs.getString("batch_number"));
+                qc.put("product", rs.getString("product_name"));
+                qc.put("order", rs.getString("order_id"));
+                qc.put("supplier", rs.getString("supplier_name"));
+                qc.put("receivedQty", rs.getString("quantity_received"));
+                qc.put("damaged", rs.getString("quantity_damaged"));
+                qc.put("returned", rs.getString("quantity_return"));
+                qc.put("condition", rs.getString("qc_condition"));
+                qc.put("remarks", rs.getString("remarks"));
+                qc.put("date", rs.getString("qc_date"));
+                qc.put("staff", rs.getString("staff_name"));
+            }
+    
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    
+        return qc;
+    }
+    
+    /* ===============================
        SAVE QC (POSTGRES SAFE)
        =============================== */
     public void saveQC(
@@ -192,3 +251,4 @@ public class ProductQCDAO {
         }
     }
 }
+
