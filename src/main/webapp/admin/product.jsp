@@ -237,34 +237,61 @@ input:disabled {
 
 				<!-- SEARCH + FILTER (SAME STYLE AS ORDER) -->
 				<!-- SEARCH -->
-				<form class="search-form">
+				<form method="get"
+			      action="<%=request.getContextPath()%>/product"
+			      class="search-form">
+			
+			    <!-- SEARCH -->
+			    <div class="search-box">
+			        <input type="text"
+			               name="keyword"
+			               value="<%=request.getParameter("keyword") != null ? request.getParameter("keyword") : ""%>"
+			               placeholder="Search product by ID or Name"
+			               class="search-input">
+			        <i class="fas fa-search search-icon"></i>
+			    </div>
+			
+			    <!-- FILTER -->
+			    <div class="filter-box">
+			        <div class="filter-container">
+			
+			            <div class="filter-icon">
+			                <i class="fas fa-filter"></i>
+			            </div>
+			
+			            <select name="category" class="filter-select">
+						    <option value="">All Category</option>
+						    <option value="PET_FOOD"
+						        <%= "PET_FOOD".equals(request.getParameter("category")) ? "selected" : "" %>>
+						        Pet Food
+						    </option>
+						    <option value="PET_MEDICINE"
+						        <%= "PET_MEDICINE".equals(request.getParameter("category")) ? "selected" : "" %>>
+						        Pet Medicine
+						    </option>
+						    <option value="PET_CARE"
+						        <%= "PET_CARE".equals(request.getParameter("category")) ? "selected" : "" %>>
+						        Pet Care
+						    </option>
+						    <option value="PET_ACCESSORY"
+						        <%= "PET_ACCESSORY".equals(request.getParameter("category")) ? "selected" : "" %>>
+						        Pet Accessory
+						    </option>
+						</select>
 
-					<div class="search-box">
-						<input type="text" id="searchInput"
-							placeholder="Search Supplier by ID, Name or Email"
-							class="search-input"> <i
-							class="fas fa-search search-icon"></i>
-					</div>
-
-					<!-- FILTER -->
-					<div class="filter-box">
-						<div class="filter-container">
-
-							<div class="filter-icon">
-								<i class="fas fa-filter"></i>
-							</div>
-
-							<select id="categoryFilter" class="filter-select">
-								<option value="">All Category</option>
-								<option value="PET_FOOD">Pet Food</option>
-								<option value="PET_MEDICINE">Pet Medicine</option>
-								<option value="PET_CARE">Pet Care</option>
-								<option value="PET_ACCESSORY">Pet Accessory</option>
-							</select> <i class="fas fa-caret-down filter-arrow"></i>
-						</div>
-					</div>
-
-				</form>
+			
+			            <i class="fas fa-caret-down filter-arrow"></i>
+			        </div>
+			    </div>
+			
+			    <!-- BUTTON -->
+			    <button
+			        class="bg-green-600 hover:bg-green-700
+			               text-white px-6 rounded-full font-semibold shadow">
+			        Search
+			    </button>
+			
+			</form>
 
 				<!-- TABLE -->
 				<div class="overflow-x-hidden">
@@ -338,75 +365,6 @@ input:disabled {
                              bg-black text-white text-[10px] px-2 py-1 rounded">
 												View </span>
 										</div>
-
-										<!-- EDIT -->
-										<div class="relative group">
-											<i
-												class="fas fa-pencil-alt text-black text-lg hover:scale-150 transition cursor-pointer"
-												onclick="openEditModal(
-                       '<%=p.getProductId()%>',
-                       '<%=p.getName()%>',
-                       '<%=p.getCategory()%>',
-                       '<%=p.getBrand()%>',
-                       <%=p.getQuantity()%>,
-                       <%=p.getMinQuantity()%>,
-                       <%=p.getPurchasePrice()%>,
-                       <%=p.getSellingPrice()%>,
-                       '<%=p.getImage()%>'
-                   )"></i>
-
-											<span
-												class="absolute bottom-full mb-2 hidden group-hover:block
-                             bg-black text-white text-[10px] px-2 py-1 rounded">
-												Update </span>
-										</div>
-
-									</div>
-								</td>
-
-							</tr>
-
-							<%
-							}
-							} else {
-							%>
-							<tr>
-								<td colspan="7" class="p-6 text-center text-gray-500 italic">
-									No products available</td>
-							</tr>
-							<%
-							}
-							%>
-
-						</tbody>
-					</table>
-					<!-- ===== PAGINATION ===== -->
-<div class="flex justify-between items-center mt-6">
-
-    <!-- LEFT : PAGINATION BUTTONS -->
-    <div id="pagination"
-         class="flex items-center gap-2 text-sm bg-gray-100 px-4 py-2 rounded-full">
-    </div>
-
-    <!-- RIGHT : ROWS PER PAGE -->
-    <div class="flex items-center gap-2 text-sm">
-        <span class="text-gray-600">Rows:</span>
-        <select id="rowsPerPageSelect"
-                class="border border-gray-300 rounded-full px-3 py-1 bg-white cursor-pointer">
-            <option value="5">5 / page</option>
-            <option value="10" selected>10 / page</option>
-            <option value="20">20 / page</option>
-        </select>
-    </div>
-
-</div>
-
-
-				</div>
-
-			</div>
-		</main>
-	</div>
 
 	<!-- ===== VIEW PRODUCT MODAL ===== -->
 	<div id="viewModal"
@@ -706,73 +664,6 @@ function formatDate(dateStr) {
 }
 
 /* ===============================
-SEARCH & FILTER (AJAX)
-=============================== */
-const searchInput = document.getElementById("searchInput");
-const categoryFilter = document.getElementById("categoryFilter");
-const tableBody = document.querySelector("tbody");
-const contextPath = "<%=request.getContextPath()%>";
-let typingTimer;
-
-searchInput.addEventListener("input", () => {
- clearTimeout(typingTimer);
- typingTimer = setTimeout(loadProducts, 400);
-});
-
-categoryFilter.addEventListener("change", loadProducts);
-
-function loadProducts() {
-
- fetch(
-     contextPath + "/product?ajax=true"
-     + "&keyword=" + encodeURIComponent(searchInput.value || "")
-     + "&category=" + encodeURIComponent(categoryFilter.value || "")
- )
- .then(res => res.json())
- .then(data => {
-
-     tableBody.innerHTML = "";
-
-     if (!data || data.length === 0) {
-         tableBody.innerHTML =
-             "<tr><td colspan='7' class='text-center text-gray-500 p-4'>No product found</td></tr>";
-         paginateTable();
-         return;
-     }
-
-     data.forEach(p => {
-
-         const imgHtml = p.img
-             ? "<img src='" + contextPath + "/product-image?file=" + p.img + "' class='h-10 mx-auto'>"
-             : "-";
-
-         tableBody.insertAdjacentHTML("beforeend",
-             "<tr>" +
-             "<td>" + imgHtml + "</td>" +
-             "<td>" + p.id + "</td>" +
-             "<td>" + p.name + "</td>" +
-             "<td>" + p.qty + "</td>" +
-             "<td>" + p.category + "</td>" +
-             "<td>RM " + Number(p.sell).toFixed(2) + "</td>" +
-             "<td class='text-center'>" +
-             "<i class='fas fa-eye cursor-pointer mr-4' onclick=\"openViewModal('" +
-             p.id + "','" + p.name + "','" + p.category + "','" + p.brand + "','" +
-             p.qty + "','" + (p.min || 0) + "','" + p.buy + "','" + p.sell + "','" +
-             (p.img || "") + "')\"></i>" +
-             "<i class='fas fa-pencil-alt cursor-pointer' onclick=\"openEditModal('" +
-             p.id + "','" + p.name + "','" + p.category + "','" + p.brand + "','" +
-             p.qty + "','" + (p.min || 0) + "','" + p.buy + "','" + p.sell + "','" +
-             (p.img || "") + "')\"></i>" +
-             "</td></tr>"
-         );
-     });
-
-     currentPage = 1;
-     paginateTable();
- });
-}
-
-/* ===============================
 ADVANCED PAGINATION (LIKE DESIGN)
 =============================== */
 
@@ -891,3 +782,4 @@ document.addEventListener("DOMContentLoaded", paginateTable);
 </script>
 </body>
 </html>
+
