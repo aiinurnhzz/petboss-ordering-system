@@ -190,10 +190,10 @@ public class ProductQCDAO {
             // ===============================
             String insertQC = """
                 INSERT INTO qualitycheck
-                (qc_id, batch_number, condition,
+                (qc_id, batch_number, qc_condition,
                  quantity_damaged, quantity_return,
                  qc_status, remarks, staff_id)
-                VALUES (?, ?, ?, ?, ?, 'COMPLETED', ?, ?)
+                VALUES (?,?,?,?,?,'COMPLETED',?,?)
             """;
     
             try (PreparedStatement ps = con.prepareStatement(insertQC)) {
@@ -253,7 +253,14 @@ public class ProductQCDAO {
                 }
             }
     
-            con.commit();
-        }
-    }
+            con.commit(); // 🔥 INI PENTING
+            
+            } catch (Exception e) {
+                if (con != null) con.rollback(); // 🔥 INI WAJIB
+                e.printStackTrace();
+                throw e;
+            } finally {
+                if (con != null) con.close();
+            }
 }
+
