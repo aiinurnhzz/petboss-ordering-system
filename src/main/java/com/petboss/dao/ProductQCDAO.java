@@ -70,7 +70,7 @@ public class ProductQCDAO {
                 s.supplier_name,
                 r.quantity_received,
                 TO_CHAR(qc.qc_date,'YYYY-MM-DD') qc_date,
-                qc.condition,
+                qc."condition",
                 qc.quantity_return
             FROM qualitycheck qc
             JOIN receive r ON qc.batch_number = r.batch_number
@@ -191,7 +191,7 @@ public class ProductQCDAO {
                 // ===============================
                 String insertQC = """
                     INSERT INTO qualitycheck
-                    (qc_id, batch_number, condition,
+                    (qc_id, batch_number, "condition",
                      quantity_damaged, quantity_return,
                      qc_status, remarks, staff_id)
                     VALUES (?,?,?,?,?,'COMPLETED',?,?)
@@ -264,3 +264,4 @@ public class ProductQCDAO {
             }
         }
 }
+
