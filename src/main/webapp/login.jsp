@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta name="google-site-verification" content="7RlxOODrAYO0uvqZOU07Fpu_7tkxMtnJSN53QOLi4jU" />
 <meta charset="UTF-8">
 <title>PetBoss Login</title>
 
@@ -109,3 +110,4 @@ function togglePassword() {
 </script>
 </body>
 </html>
+
