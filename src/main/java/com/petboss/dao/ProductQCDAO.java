@@ -21,7 +21,7 @@ public class ProductQCDAO {
                 o.order_id,
                 s.supplier_name,
                 r.quantity_received,
-                TO_CHAR(r.arrival_date,'YYYY-MM-DD') arrival_date
+                TO_CHAR(r.arrival_date,'YYYY-MM-DD') AS arrival_date
             FROM receive r
             JOIN orderdetail od ON r.orderdetail_id = od.orderdetail_id
             JOIN orders o ON od.order_id = o.order_id
@@ -69,7 +69,7 @@ public class ProductQCDAO {
                 o.order_id,
                 s.supplier_name,
                 r.quantity_received,
-                TO_CHAR(qc.qc_date,'YYYY-MM-DD') qc_date,
+                TO_CHAR(qc.qc_date,'YYYY-MM-DD') AS qc_date,
                 qc.condition,
                 qc.quantity_return
             FROM qualitycheck qc
@@ -106,6 +106,9 @@ public class ProductQCDAO {
         return list;
     }
 
+    /* ===============================
+       GET QC DETAIL
+       =============================== */
     public Map<String,String> getQCById(String qcId) {
 
         Map<String,String> qc = new HashMap<>();
@@ -122,7 +125,7 @@ public class ProductQCDAO {
                 qc.quantity_return,
                 qc.condition,
                 qc.remarks,
-                TO_CHAR(qc.qc_date,'YYYY-MM-DD') qc_date,
+                TO_CHAR(qc.qc_date,'YYYY-MM-DD') AS qc_date,
                 st.full_name AS staff_name
             FROM qualitycheck qc
             JOIN receive r ON qc.batch_number = r.batch_number
@@ -163,7 +166,7 @@ public class ProductQCDAO {
     }
 
     /* ===============================
-       SAVE QC (FINAL & SAFE)
+       SAVE QC (POSTGRES SAFE)
        =============================== */
     public void saveQC(
         String batchNumber,
@@ -178,29 +181,19 @@ public class ProductQCDAO {
             con.setAutoCommit(false);
 
             // ===============================
-            // 1️⃣ Generate QC ID
+            // 1️⃣ Generate QC ID (JAVA WAY)
             // ===============================
-            String qcId;
-            try (PreparedStatement ps = con.prepareStatement(
-                    "SELECT 'QC' || LPAD(QC_SEQ.NEXTVAL,3,'0') FROM dual"
-            );
-                 ResultSet rs = ps.executeQuery()) {
-
-                if (!rs.next()) {
-                    throw new Exception("Failed to generate QC ID");
-                }
-                qcId = rs.getString(1);
-            }
+            String qcId = "QC" + System.currentTimeMillis();
 
             // ===============================
-            // 2️⃣ Insert QC record
+            // 2️⃣ Insert QC
             // ===============================
             String insertQC = """
                 INSERT INTO qualitycheck
                 (qc_id, batch_number, condition,
                  quantity_damaged, quantity_return,
                  qc_status, qc_date, remarks, staff_id)
-                VALUES (?,?,?,?,?,'COMPLETED',SYSDATE,?,?)
+                VALUES (?,?,?,?,?,'COMPLETED', CURRENT_DATE, ?, ?)
             """;
 
             try (PreparedStatement ps = con.prepareStatement(insertQC)) {
@@ -215,7 +208,7 @@ public class ProductQCDAO {
             }
 
             // ===============================
-            // 3️⃣ Fetch received qty + product
+            // 3️⃣ Fetch received qty & product
             // ===============================
             int receivedQty;
             String productId;
@@ -243,22 +236,22 @@ public class ProductQCDAO {
             // 4️⃣ Calculate GOOD qty
             // ===============================
             int goodQty =
-                    "GOOD".equalsIgnoreCase(condition)
-                            ? receivedQty
-                            : Math.max(0, receivedQty - qtyDamaged);
+                "GOOD".equalsIgnoreCase(condition)
+                    ? receivedQty
+                    : Math.max(0, receivedQty - qtyDamaged);
 
-         // ===============================
-         // 5️⃣ Update stock (FIXED)
-         // ===============================
-         if (goodQty > 0) {
-             try (PreparedStatement ps = con.prepareStatement(
-                     "UPDATE product SET quantity = quantity + ? WHERE product_id = ?"
-             )) {
-                 ps.setInt(1, goodQty);
-                 ps.setString(2, productId);
-                 ps.executeUpdate();
-             }
-         }
+            // ===============================
+            // 5️⃣ Update product stock
+            // ===============================
+            if (goodQty > 0) {
+                try (PreparedStatement ps = con.prepareStatement(
+                        "UPDATE product SET quantity = quantity + ? WHERE product_id = ?"
+                )) {
+                    ps.setInt(1, goodQty);
+                    ps.setString(2, productId);
+                    ps.executeUpdate();
+                }
+            }
 
             con.commit();
         }
