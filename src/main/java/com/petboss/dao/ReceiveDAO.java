@@ -18,23 +18,23 @@ public class ReceiveDAO {
 
     String sql = """
         SELECT
-            od.order_detail_id,
+            od.orderdetail_id,
             od.product_id,
             p.name AS product_name,
             od.quantity AS quantity_ordered,
             COALESCE(SUM(r.quantity_received), 0) AS received_qty
-        FROM order_detail od
+        FROM orderdetail od
         JOIN product p
             ON p.product_id = od.product_id
         LEFT JOIN receive r
-            ON r.order_detail_id = od.order_detail_id
+            ON r.orderdetail_id = od.orderdetail_id
         WHERE od.order_id = ?
         GROUP BY
-            od.order_detail_id,
+            od.orderdetail_id,
             od.product_id,
             p.name,
             od.quantity
-        ORDER BY od.order_detail_id
+        ORDER BY od.orderdetail_id
     """;
 
     try (Connection con = DBConnection.getConnection();
@@ -45,7 +45,7 @@ public class ReceiveDAO {
 
         while (rs.next()) {
             OrderItem i = new OrderItem();
-            i.setOrderDetailId(rs.getInt("order_detail_id"));
+            i.setOrderDetailId(rs.getInt("orderdetail_id"));
             i.setProductId(rs.getString("product_id"));
             i.setProductName(rs.getString("product_name"));
             i.setQuantity(rs.getInt("quantity_ordered"));
@@ -144,38 +144,40 @@ public class ReceiveDAO {
     	}
     	
     	String sql = """
-    	        INSERT INTO receive
-    	        (batch_number, orderdetail_id, invoice_no, quantity_received, arrival_date)
-    	        VALUES (?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'))
-    	    """;
-
-    	    try (Connection con = DBConnection.getConnection();
-    	         PreparedStatement ps = con.prepareStatement(sql)) {
-
-    	        String datePart =
-    	            new java.text.SimpleDateFormat("yyyyMMdd")
-    	                .format(new java.util.Date());
-
-    	        int seq = getNextBatchSequence(productId);
-    	        String batchNo =
-    	            productId + "-" + datePart + "-" + String.format("%03d", seq);
-
-    	        ps.setString(1, batchNo);
-    	        ps.setInt(2, orderDetailId);
-
-    	        if (invoiceNo == null || invoiceNo.isBlank()) {
-    	            ps.setNull(3, java.sql.Types.VARCHAR);
-    	        } else {
-    	            ps.setString(3, invoiceNo);
-    	        }
-
-    	        ps.setInt(4, quantity);
-    	        ps.setString(5, arrivalDate);
-
-    	        ps.executeUpdate();
-
-    			    new ReceiveOrderDAO().updateOrderStatus(orderId);
-    			}
+            INSERT INTO receive
+            (batch_number, orderdetail_id, invoice_no, quantity_received, arrival_date)
+            VALUES (?, ?, ?, ?, ?)
+        """;
+        
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+        
+            String datePart =
+                new java.text.SimpleDateFormat("yyyyMMdd")
+                    .format(new java.util.Date());
+        
+            int seq = getNextBatchSequence(productId);
+            String batchNo =
+                productId + "-" + datePart + "-" + String.format("%03d", seq);
+        
+            ps.setString(1, batchNo);
+            ps.setInt(2, orderDetailId);
+        
+            if (invoiceNo == null || invoiceNo.isBlank()) {
+                ps.setNull(3, java.sql.Types.VARCHAR);
+            } else {
+                ps.setString(3, invoiceNo);
+            }
+        
+            ps.setInt(4, quantity);
+        
+            // 🔥 POSTGRES WAY
+            ps.setDate(5, java.sql.Date.valueOf(arrivalDate));
+        
+            ps.executeUpdate();
+        
+            new ReceiveOrderDAO().updateOrderStatus(orderId);
+            }
     			catch (Exception e) {
     			    throw e; // ✅ penting
     			}    
@@ -225,5 +227,6 @@ public class ReceiveDAO {
     }
 
 }
+
 
 
