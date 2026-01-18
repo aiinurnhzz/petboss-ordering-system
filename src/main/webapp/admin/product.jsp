@@ -282,76 +282,76 @@ input:disabled {
 						</thead>
 
 						<tbody>
-							<%
-							if (products != null && !products.isEmpty()) {
-								for (Product p : products) {
-							%>
-
-				<tr class="product-row">
-				    <!-- IMAGE -->
-				    <td class="border p-2 text-center">
-				    <%
-				    String img = p.getImage();
-				    String imgSrc = null;
-				
-				    if (img != null && !img.isEmpty()) {
-				        if (img.startsWith("http")) {
-				            imgSrc = img;
-				        } else {
-				            imgSrc = request.getContextPath() + "/images/products/" + img;
-				        }
-				    }
-				
-				    if (imgSrc != null) {
-				        out.print(
-				            "<img src='" + imgSrc + "' class='h-10 mx-auto' " +
-				            "onerror=\"this.src='" + request.getContextPath() + "/images/default-product.png'\">"
-				        );
-				    } else {
-				        out.print("—");
-				    }
-				    %>
-				    </td>
-				
-				    <!-- PRODUCT ID -->
-				    <td class="border p-2"><%=p.getProductId()%></td>
-				
-				    <!-- NAME -->
-				    <td class="border p-2"><%=p.getName()%></td>
-				
-				    <!-- QUANTITY -->
-				    <td class="border p-2"><%=p.getQuantity()%></td>
-				
-				    <!-- CATEGORY -->
-				    <td class="border p-2"><%=p.getCategory()%></td>
-				
-				    <!-- PRICE -->
-				    <td class="border p-2">
-				        RM <%=String.format("%.2f", p.getSellingPrice())%>
-				    </td>
-				
-				    <!-- ACTION -->
-				    <td class="border p-2 text-center">
-				        <i class="fas fa-eye cursor-pointer"
-				           onclick="openViewModal(
-				           '<%=p.getProductId()%>',
-				           '<%=p.getName()%>',
-				           '<%=p.getCategory()%>',
-				           '<%=p.getBrand()%>',
-				           <%=p.getQuantity()%>,
-				           <%=p.getMinQuantity()%>,
-				           <%=p.getPurchasePrice()%>,
-				           <%=p.getSellingPrice()%>,
-				           '<%=p.getImage()%>'
-				        )"></i>
-				    </td>
-				</tr>
-						<span
-						class="absolute bottom-full mb-2 hidden group-hover:block
-                            bg-black text-white text-[10px] px-2 py-1 rounded">
-						View </span>
-						</div>
+						<%
+						if (products != null && !products.isEmpty()) {
+						    for (Product p : products) {
+						%>
+						
+						<tr class="product-row">
+						
+						    <!-- IMAGE -->
+						    <td class="border p-2 text-center">
+						    <%
+						        String img = p.getImage();
+						        String imgSrc = null;
+						
+						        if (img != null && !img.isEmpty()) {
+						            if (img.startsWith("http")) {
+						                imgSrc = img;
+						            } else {
+						                imgSrc = request.getContextPath() + "/images/products/" + img;
+						            }
+						        }
+						    %>
+						
+						    <% if (imgSrc != null) { %>
+						        <img src="<%=imgSrc%>" class="h-10 mx-auto"
+						             onerror="this.src='<%=request.getContextPath()%>/images/default-product.png'">
+						    <% } else { %>
+						        —
+						    <% } %>
+						    </td>
+						
+						    <td class="border p-2"><%=p.getProductId()%></td>
+						    <td class="border p-2"><%=p.getName()%></td>
+						    <td class="border p-2"><%=p.getQuantity()%></td>
+						    <td class="border p-2"><%=p.getCategory()%></td>
+						    <td class="border p-2">
+						        RM <%=String.format("%.2f", p.getSellingPrice())%>
+						    </td>
+						
+						    <!-- ACTION -->
+						    <td class="border p-2 text-center">
+						        <i class="fas fa-eye cursor-pointer"
+						           onclick="openViewModal(
+						           '<%=p.getProductId()%>',
+						           '<%=p.getName()%>',
+						           '<%=p.getCategory()%>',
+						           '<%=p.getBrand()%>',
+						           <%=p.getQuantity()%>,
+						           <%=p.getMinQuantity()%>,
+						           <%=p.getPurchasePrice()%>,
+						           <%=p.getSellingPrice()%>,
+						           '<%=p.getImage()%>'
+						        )"></i>
+						    </td>
+						
+						</tr>
+						
+						<%
+						    } // end for
+						} else {
+						%>
+						<tr>
+						    <td colspan="7" class="text-center text-gray-500 p-4">
+						        No products found
+						    </td>
+						</tr>
+						<%
+						}
+						%>
 						</tbody>
+
 					</table>
 					<!-- ===== PAGINATION ===== -->
 <div class="flex justify-between items-center mt-6">
@@ -373,8 +373,6 @@ input:disabled {
     </div>
 
 </div>
-
-
 				</div>
 
 			</div>
@@ -872,4 +870,5 @@ document.addEventListener("DOMContentLoaded", paginateTable);
 
 </body>
 </html>
+
 
