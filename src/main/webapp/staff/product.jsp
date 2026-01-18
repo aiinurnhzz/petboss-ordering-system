@@ -14,7 +14,7 @@ List<Product> products = (List<Product>) request.getAttribute("products");
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet"
- href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
 html, body {
@@ -191,11 +191,6 @@ input:disabled {
         px-4 rounded-full flex items-center gap-3
         border-2 border-white shadow-md text-sm font-semibold">
 					<i class="fas fa-user-circle w-5 text-center"></i><span>Profile</span>
-				</a> <a href="<%=request.getContextPath()%>/staff"
-					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
-        px-4 rounded-full flex items-center gap-3
-        border-2 border-white shadow-md text-sm font-semibold">
-					<i class="fas fa-users w-5 text-center"></i><span>Staff</span>
 				</a> <a href="<%=request.getContextPath()%>/product"
 					class="mx-auto w-[85%] h-11 bg-[#009a49] hover:bg-[#009a49] text-white
         px-4 rounded-full flex items-center gap-3
@@ -206,7 +201,13 @@ input:disabled {
         px-4 rounded-full flex items-center gap-3
         border-2 border-white shadow-md text-sm font-semibold">
 					<i class="fas fa-truck w-5 text-center"></i><span>Supplier</span>
+				</a> <a href="<%=request.getContextPath()%>/product-qc"
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-box w-5 text-center"></i><span>Product QC</span>
 				</a>
+
 			</nav>
 
 			<div class="flex justify-center mt-auto pb-4">
@@ -870,4 +871,5 @@ document.addEventListener("DOMContentLoaded", paginateTable);
 
 </body>
 </html>
+
 
