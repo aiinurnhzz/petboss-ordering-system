@@ -14,7 +14,7 @@ List<Product> products = (List<Product>) request.getAttribute("products");
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet"
-	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
 html, body {
@@ -191,6 +191,11 @@ input:disabled {
         px-4 rounded-full flex items-center gap-3
         border-2 border-white shadow-md text-sm font-semibold">
 					<i class="fas fa-user-circle w-5 text-center"></i><span>Profile</span>
+				</a> <a href="<%=request.getContextPath()%>/staff"
+					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
+        px-4 rounded-full flex items-center gap-3
+        border-2 border-white shadow-md text-sm font-semibold">
+					<i class="fas fa-users w-5 text-center"></i><span>Staff</span>
 				</a> <a href="<%=request.getContextPath()%>/product"
 					class="mx-auto w-[85%] h-11 bg-[#009a49] hover:bg-[#009a49] text-white
         px-4 rounded-full flex items-center gap-3
@@ -201,13 +206,7 @@ input:disabled {
         px-4 rounded-full flex items-center gap-3
         border-2 border-white shadow-md text-sm font-semibold">
 					<i class="fas fa-truck w-5 text-center"></i><span>Supplier</span>
-				</a> <a href="<%=request.getContextPath()%>/product-qc"
-					class="mx-auto w-[85%] h-11 bg-[#f2711c] hover:bg-[#009a49] text-white
-        px-4 rounded-full flex items-center gap-3
-        border-2 border-white shadow-md text-sm font-semibold">
-					<i class="fas fa-box w-5 text-center"></i><span>Product QC</span>
 				</a>
-
 			</nav>
 
 			<div class="flex justify-center mt-auto pb-4">
@@ -216,638 +215,105 @@ input:disabled {
 			</div>
 		</aside>
 
-		<!-- ===== MAIN ===== -->
-		<main class="flex-1 p-8 overflow-y-auto">
-
-			<div
-				class="bg-white border-2 border-[#009a49] rounded-2xl p-6 shadow">
-
-				<!-- TITLE ROW -->
-				<div class="flex justify-between items-center mb-4">
-					<h2 class="text-3xl font-black text-cyan-900">PRODUCT</h2>
-
-				</div>
-
-				<!-- DIVIDER -->
-				<hr class="border-green-600 mb-6">
-
-				<!-- SEARCH + FILTER (SAME STYLE AS ORDER) -->
-				<form class="search-form" onsubmit="return false;">
-
-
-					<div class="search-box">
-						<input type="text" id="searchInput"
-							placeholder="Search Supplier by ID, Name or Email"
-							class="search-input"> <i
-							class="fas fa-search search-icon"></i>
-					</div>
-
-					<!-- FILTER -->
-					<div class="filter-box">
-						<div class="filter-container">
-
-							<div class="filter-icon">
-								<i class="fas fa-filter"></i>
-							</div>
-
-							<select id="categoryFilter" class="filter-select">
-								<option value="">All Category</option>
-								<option value="PET_FOOD">Pet Food</option>
-								<option value="PET_MEDICINE">Pet Medicine</option>
-								<option value="PET_CARE">Pet Care</option>
-								<option value="PET_ACCESSORY">Pet Accessory</option>
-							</select> <i class="fas fa-caret-down filter-arrow"></i>
-						</div>
-					</div>
-
-				</form>
-
-				<!-- TABLE -->
-				<div class="overflow-x-hidden">
-					<table class="w-full border-collapse">
-						<thead>
-							<tr>
-								<th class="border p-2">Image</th>
-								<th class="border p-2">Product ID</th>
-								<th class="border p-2">Name</th>
-								<th class="border p-2">Quantity</th>
-								<th class="border p-2">Category</th>
-								<th class="border p-2">Selling Price (RM)</th>
-								<th class="border p-2">Action</th>
-							</tr>
-						</thead>
-
-						<tbody>
-							<%
-							if (products != null && !products.isEmpty()) {
-								for (Product p : products) {
-							%>
-
-							<tr class="product-row">
-
-								<!-- IMAGE -->
-								<td class="border p-2 text-center">
-									<%
-									if (p.getImage() != null) {
-									%> <img
-									src="<%=request.getContextPath()%>/product-image?file=<%=p.getImage()%>"
-									class="h-10 mx-auto"> <%
- } else {
- %> — <%
- }
- %>
-								</td>
-
-								<td class="border p-2"><%=p.getProductId()%></td>
-								<td class="border p-2 text-center"><%=p.getName()%></td>
-
-								<td class="border p-2 text-center font-semibold"><%=p.getQuantity()%>
-								</td>
-
-								<td class="border p-2"><%=p.getCategory()%></td>
-
-								<td class="border p-2 text-center">RM <%=String.format("%.2f", p.getSellingPrice())%>
-								</td>
-
-								<!-- ACTION -->
-								<td class="border p-2 text-center">
-									<div class="flex justify-center items-center gap-4">
-
-										<!-- VIEW -->
-										<div class="relative group">
-											<i
-												class="fas fa-eye text-black text-lg hover:scale-150 transition cursor-pointer"
-												onclick="openViewModal(
-                       '<%=p.getProductId()%>',
-                       '<%=p.getName()%>',
-                       '<%=p.getCategory()%>',
-                       '<%=p.getBrand()%>',
-                       <%=p.getQuantity()%>,
-                       <%=p.getMinQuantity()%>,
-                       <%=p.getPurchasePrice()%>,
-                       <%=p.getSellingPrice()%>,
-                       '<%=p.getImage()%>'
-                   )"></i>
-
-											<span
-												class="absolute bottom-full mb-2 hidden group-hover:block
-                             bg-black text-white text-[10px] px-2 py-1 rounded">
-												View </span>
-										</div>
-
-										<!-- EDIT -->
-										<div class="relative group">
-											<i
-												class="fas fa-pencil-alt text-black text-lg hover:scale-150 transition cursor-pointer"
-												onclick="openEditModal(
-                       '<%=p.getProductId()%>',
-                       '<%=p.getName()%>',
-                       '<%=p.getCategory()%>',
-                       '<%=p.getBrand()%>',
-                       <%=p.getQuantity()%>,
-                       <%=p.getMinQuantity()%>,
-                       <%=p.getPurchasePrice()%>,
-                       <%=p.getSellingPrice()%>,
-                       '<%=p.getImage()%>'
-                   )"></i>
-
-											<span
-												class="absolute bottom-full mb-2 hidden group-hover:block
-                             bg-black text-white text-[10px] px-2 py-1 rounded">
-												Update </span>
-										</div>
-
-									</div>
-								</td>
-
-							</tr>
-
-							<%
-							}
-							} else {
-							%>
-							<tr>
-								<td colspan="7" class="p-6 text-center text-gray-500 italic">
-									No products available</td>
-							</tr>
-							<%
-							}
-							%>
-
-						</tbody>
-					</table>
-					<!-- ===== PAGINATION ===== -->
-					<div class="flex justify-between items-center mt-6">
-
-						<!-- LEFT : PAGINATION BUTTONS -->
-						<div id="pagination"
-							class="flex items-center gap-2 text-sm bg-gray-100 px-4 py-2 rounded-full">
-						</div>
-
-						<!-- RIGHT : ROWS PER PAGE -->
-						<div class="flex items-center gap-2 text-sm">
-							<span class="text-gray-600">Rows:</span> <select
-								id="rowsPerPageSelect"
-								class="border border-gray-300 rounded-full px-3 py-1 bg-white cursor-pointer">
-								<option value="5">5 / page</option>
-								<option value="10" selected>10 / page</option>
-								<option value="20">20 / page</option>
-							</select>
-						</div>
-
-					</div>
-
-				</div>
-
-			</div>
-		</main>
-	</div>
-
-	<!-- ===== VIEW PRODUCT MODAL ===== -->
-	<div id="viewModal"
-		class="fixed inset-0 bg-black bg-opacity-50 z-[110] hidden
-            flex items-center justify-center p-4">
-
-		<div
-			class="bg-white w-full max-w-5xl rounded-3xl
-           border-2 border-[#009a49] shadow-2xl
-           overflow-hidden flex flex-col md:flex-row">
-
-
-			<!-- ===== LEFT : PRODUCT PREVIEW ===== -->
-			<div class="w-full md:w-1/3 bg-white p-6 border-r border-gray-200">
-				<div
-					class="border-2 border-[#009a49] rounded-xl p-4 h-full flex flex-col">
-
-					<h3
-						class="text-lg font-bold text-green-700 mb-4 border-b border-green-200 pb-1">PRODUCT
-						PREVIEW</h3>
-
-					<div
-						class="w-full aspect-square bg-white rounded-lg mb-4
-                        flex items-center justify-center overflow-hidden
-                        border border-gray-100">
-						<img id="viewImg" class="max-w-full max-h-full object-contain">
-					</div>
-
-					<div class="space-y-3 flex-grow">
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Product Name </label> <input id="viewName"
-								class="w-full text-xs border border-[#009a49]
-                                  rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Category </label> <input id="viewCategory"
-								class="w-full text-xs border border-[#009a49]
-                                  rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Product Brand </label> <input id="viewBrand"
-								class="w-full text-xs border border-[#009a49]
-                                  rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								SKU / Code / ID </label> <input id="viewId"
-								class="w-full text-xs border border-[#009a49]
-                                  rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- ===== RIGHT : DETAILS ===== -->
-			<div class="w-full md:w-2/3 p-8 flex flex-col h-full bg-gray-50">
-
-				<div class="flex-grow space-y-8">
-
-					<!-- STOCK -->
-					<div
-						class="bg-white rounded-2xl p-6 shadow-sm border border-green-100">
-						<h4
-							class="text-lg font-bold text-green-700 mb-4 border-b border-green-200 pb-1">
-							STOCK DETAILS</h4>
-
-
-						<div class="grid grid-cols-2 gap-6">
-
-							<div>
-								<label class="text-xs font-bold text-gray-600"> Current
-									Quantity </label> <input id="viewQty"
-									class="w-full border border-[#009a49]
-                                      rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-
-							<div>
-								<label class="text-xs font-bold text-gray-600"> Minimum
-									Quantity </label> <input id="viewMin"
-									class="w-full border border-[#009a49]
-                                      rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-						</div>
-					</div>
-
-					<!-- PRICING -->
-					<div
-						class="bg-white rounded-2xl p-6 shadow-sm border border-green-100">
-						<h4
-							class="text-lg font-bold text-green-700 mb-4 border-b border-green-200 pb-1">
-							PRICING</h4>
-
-
-
-						<div class="grid grid-cols-2 gap-x-12 gap-y-4">
-							<div>
-								<label class="text-xs font-bold text-gray-600"> Purchase
-									Price (RM) </label> <input id="viewBuy"
-									class="w-full border border-[#009a49]
-                                      rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-
-							<div>
-								<label class="text-xs font-bold text-gray-600"> Selling
-									Price (RM) </label> <input id="viewSell"
-									class="w-full border border-[#009a49]
-                                      rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-						</div>
-					</div>
-
-					<!-- CATEGORY DETAILS -->
-					<div id="viewCategorySection"
-						class="mt-10 hidden bg-white rounded-2xl p-6
-            border border-dashed border-green-300">
-
-						<h4
-							class="text-green-700 font-bold mb-4
-			               border-b border-green-200 pb-1">
-							CATEGORY DETAILS</h4>
-
-						<!-- PET MEDICINE -->
-						<div id="view-cat-medicine"
-							class="hidden grid grid-cols-2 gap-x-12 gap-y-4">
-
-							<div>
-								<label class="text-xs font-bold text-gray-600">Dosage</label> <input
-									id="viewMedDosage"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-
-							<div>
-								<label class="text-xs font-bold text-gray-600">Expiry
-									Date</label> <input id="viewMedExpiry"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-
-							<div class="col-span-2">
-								<label class="text-xs font-bold text-gray-600">Prescription</label>
-								<input id="viewMedPrescription"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-						</div>
-
-						<!-- PET FOOD -->
-						<div id="view-cat-food"
-							class="hidden grid grid-cols-2 gap-x-12 gap-y-4">
-							<div>
-								<label class="text-xs font-bold text-gray-600">Weight</label> <input
-									id="viewFoodWeight"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-							<div>
-								<label class="text-xs font-bold text-gray-600">Expiry
-									Date</label> <input id="viewFoodExpiry"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-						</div>
-
-						<!-- PET CARE -->
-						<div id="view-cat-care"
-							class="hidden grid grid-cols-2 gap-x-12 gap-y-4">
-							<div>
-								<label class="text-xs font-bold text-gray-600">Type</label> <input
-									id="viewCareType"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-							<div>
-								<label class="text-xs font-bold text-gray-600">Expiry
-									Date</label> <input id="viewCareExpiry"
-									class="w-full border border-[#009a49]
-			                          rounded-lg px-3 py-1.5 bg-gray-100"
-									disabled>
-							</div>
-						</div>
-
-						<!-- PET ACCESSORY -->
-						<div id="view-cat-accessory" class="hidden">
-							<label class="text-xs font-bold text-gray-600">Material</label> <input
-								id="viewAccMaterial"
-								class="w-full border border-[#009a49]
-			                      rounded-lg px-3 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-					</div>
-				</div>
-
-				<!-- ===== ACTION ===== -->
-				<div class="modal-actions">
-					<button type="button" onclick="closeViewModal()"
-						class="modal-btn btn-cancel">Close</button>
-				</div>
-
-			</div>
-
-		</div>
-	</div>
-
-	<!-- ===== EDIT PRODUCT MODAL ===== -->
-	<div id="editModal"
-		class="fixed inset-0 bg-black bg-opacity-50 z-[110] hidden
-		            flex items-center justify-center p-4">
-
-		<form action="<%=request.getContextPath()%>/editProduct" method="post"
-			enctype="multipart/form-data"
-			class="bg-white w-full max-w-5xl rounded-3xl
-             border-2 border-[#009a49] shadow-2xl
-             overflow-hidden flex flex-col md:flex-row">
-
-
-			<!-- 🔑 REQUIRED -->
-			<input type="hidden" name="productId" id="editIDHidden"> <input
-				type="hidden" name="category" id="editCategoryHidden">
-
-			<!-- LEFT : PRODUCT PREVIEW -->
-			<div class="w-full md:w-1/3 bg-white p-6 border-r border-gray-200">
-
-				<!-- GREEN FRAME (MATCH VIEW EXACTLY) -->
-				<div
-					class="border-2 border-[#009a49] rounded-xl p-4 h-full flex flex-col">
-
-					<h3
-						class="text-lg font-bold text-green-700 mb-4 border-b border-green-200 pb-1">
-						PRODUCT PREVIEW</h3>
-
-					<div
-						class="w-full aspect-square bg-gray-50 rounded-lg mb-4
-                   flex items-center justify-center overflow-hidden
-                   border border-gray-100">
-						<img id="editImg" class="max-w-full max-h-full object-contain">
-					</div>
-
-					<!-- IMAGE UPLOAD -->
-					<div class="mb-4">
-						<label class="text-xs font-bold text-gray-600"> CHANGE
-							PRODUCT IMAGE </label> <input type="file" name="productImage"
-							accept="image/*" onchange="previewEditImage(this)"
-							class="w-full border border-[#009a49]
-                          rounded-lg px-3 py-1.5 text-xs">
-					</div>
-
-					<!-- INFO -->
-					<div class="space-y-3 flex-grow">
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Product Name </label> <input id="editName"
-								class="w-full text-xs border border-[#009a49]
-                              rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Category </label> <input id="editCategory"
-								class="w-full text-xs border border-[#009a49]
-                              rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Brand </label> <input id="editBrand"
-								class="w-full text-xs border border-[#009a49]
-                              rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-
-						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">
-								Product ID </label> <input id="editID"
-								class="w-full text-xs border border-[#009a49]
-                              rounded px-2 py-1.5 bg-gray-100"
-								disabled>
-						</div>
-					</div>
-
-				</div>
-			</div>
-
-			<!-- RIGHT : EDIT DETAILS -->
-			<div class="w-full md:w-2/3 p-8 flex flex-col bg-gray-50">
-
-
-				<!-- CONTENT STACK -->
-				<div class="flex-grow space-y-8">
-
-					<!-- STOCK DETAILS -->
-					<div
-						class="bg-white rounded-2xl p-6 shadow-sm border border-green-100">
-						<h4 class="modal-section-title">STOCK DETAILS</h4>
-
-						<div class="grid grid-cols-2 gap-6">
-							<div>
-								<label class="block text-xs font-semibold text-gray-600 mb-1">
-									Current Quantity </label> <input type="number" name="quantity"
-									id="editQty"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-2">
-							</div>
-
-							<div>
-								<label class="block text-xs font-semibold text-gray-600 mb-1">
-									Minimum Quantity </label> <input type="number" name="minQuantity"
-									id="editMin"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-2">
-							</div>
-						</div>
-					</div>
-
-					<!-- PRICING -->
-					<div
-						class="bg-white rounded-2xl p-6 shadow-sm border border-green-100">
-						<h4 class="modal-section-title">PRICING</h4>
-
-						<div class="grid grid-cols-2 gap-6">
-							<div>
-								<label class="block text-xs font-semibold text-gray-600 mb-1">
-									Purchase Price (RM) </label> <input type="number" step="0.01"
-									name="purchasePrice" id="editBuy"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-2">
-							</div>
-
-							<div>
-								<label class="block text-xs font-semibold text-gray-600 mb-1">
-									Selling Price (RM) </label> <input type="number" step="0.01"
-									name="sellingPrice" id="editSell"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-2">
-							</div>
-						</div>
-					</div>
-
-					<!-- CATEGORY DETAILS -->
-					<div id="editCategorySection"
-						class="hidden bg-white rounded-2xl p-6 border border-dashed border-green-300">
-						<h4 class="modal-section-title">CATEGORY DETAILS</h4>
-
-						<!-- PET MEDICINE -->
-						<div id="edit-cat-medicine"
-							class="hidden grid grid-cols-2 gap-x-12 gap-y-4">
-							<div>
-								<label class="text-xs font-bold text-gray-600">Dosage</label> <input
-									name="dosage" id="editMedDosage"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-
-							<div>
-								<label class="text-xs font-bold text-gray-600">Expiry
-									Date</label> <input type="date" name="expiryDate" id="editMedExpiry"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-
-							<div class="col-span-2">
-								<label class="text-xs font-bold text-gray-600">Prescription</label>
-								<input name="prescription" id="editMedPrescription"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-						</div>
-
-						<!-- PET FOOD -->
-						<div id="edit-cat-food"
-							class="hidden grid grid-cols-2 gap-x-12 gap-y-4">
-							<div>
-								<label class="text-xs font-bold text-gray-600">Weight</label> <input
-									name="weight" id="editFoodWeight"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-
-							<div>
-								<label class="text-xs font-bold text-gray-600">Expiry
-									Date</label> <input type="date" name="expiryDate" id="editFoodExpiry"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-						</div>
-
-						<!-- PET CARE -->
-						<div id="edit-cat-care"
-							class="hidden grid grid-cols-2 gap-x-12 gap-y-4">
-							<div>
-								<label class="text-xs font-bold text-gray-600">Type</label> <input
-									name="type" id="editCareType"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-
-							<div>
-								<label class="text-xs font-bold text-gray-600">Expiry
-									Date</label> <input type="date" name="expiryDate" id="editCareExpiry"
-									class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-							</div>
-						</div>
-
-						<!-- PET ACCESSORY -->
-						<div id="edit-cat-accessory" class="hidden">
-							<label class="text-xs font-bold text-gray-600">Material</label> <input
-								name="material" id="editAccMaterial"
-								class="w-full border border-[#009a49] rounded-lg px-3 py-1.5">
-						</div>
-					</div>
-
-				</div>
-
-				<!-- ACTION BUTTONS -->
-				<div class="modal-actions">
-					<button type="button" onclick="closeEditModal()"
-						class="modal-btn btn-cancel">Cancel</button>
-
-					<button type="submit" class="modal-btn btn-save">Save</button>
-				</div>
-
-			</div>
-			<!-- CLOSE RIGHT PANEL -->
-
-		</form>
-		<!-- 🔥 CLOSE FORM PROPERLY -->
-
-	</div>
-	<!-- CLOSE editModal -->
-
-	<script>
+<!-- ===== MAIN ===== -->
+<main class="flex-1 p-8 overflow-y-auto">
+
+<div class="bg-white border-2 border-[#009a49] rounded-2xl p-6 shadow">
+
+<h2 class="text-3xl font-black text-cyan-900 mb-4">PRODUCT</h2>
+
+<form method="get" action="<%=request.getContextPath()%>/product" class="search-form">
+
+<div class="search-box">
+<input type="text" name="keyword"
+ value="<%=request.getParameter("keyword")!=null?request.getParameter("keyword"):""%>"
+ placeholder="Search product by ID or Name"
+ class="search-input">
+<i class="fas fa-search search-icon"></i>
+</div>
+
+<div class="filter-box">
+<div class="filter-container">
+<div class="filter-icon"><i class="fas fa-filter"></i></div>
+<select name="category" class="filter-select">
+<option value="">All Category</option>
+<option value="PET_FOOD" <%= "PET_FOOD".equals(request.getParameter("category"))?"selected":""%>>Pet Food</option>
+<option value="PET_MEDICINE" <%= "PET_MEDICINE".equals(request.getParameter("category"))?"selected":""%>>Pet Medicine</option>
+<option value="PET_CARE" <%= "PET_CARE".equals(request.getParameter("category"))?"selected":""%>>Pet Care</option>
+<option value="PET_ACCESSORY" <%= "PET_ACCESSORY".equals(request.getParameter("category"))?"selected":""%>>Pet Accessory</option>
+</select>
+</div>
+</div>
+
+<button class="bg-green-600 text-white px-6 rounded-full font-semibold">Search</button>
+</form>
+
+<table class="w-full border-collapse mt-6">
+<thead>
+<tr>
+<th>Image</th><th>ID</th><th>Name</th><th>Qty</th><th>Category</th><th>Price</th><th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+<% if(products!=null && !products.isEmpty()){
+for(Product p:products){ %>
+<tr>
+<td>
+<%
+String img = p.getImage();
+boolean isUrl = img != null && img.startsWith("http");
+String imgSrc = isUrl
+    ? img
+    : request.getContextPath() + "/images/products/" + img;
+%>
+
+<img src="<%=imgSrc%>"
+     class="h-10 mx-auto"
+     onerror="this.src='<%=request.getContextPath()%>/images/default-product.png'">
+</td>
+<td><%=p.getProductId()%></td>
+<td><%=p.getName()%></td>
+<td><%=p.getQuantity()%></td>
+<td><%=p.getCategory()%></td>
+<td>RM <%=String.format("%.2f",p.getSellingPrice())%></td>
+<td>
+<i class="fas fa-eye cursor-pointer"
+ onclick="openViewModal('<%=p.getProductId()%>',
+ '<%=p.getName()%>',
+ '<%=p.getCategory()%>',
+ '<%=p.getBrand()%>',
+ <%=p.getQuantity()%>,
+ <%=p.getMinQuantity()%>,
+ <%=p.getPurchasePrice()%>,
+ <%=p.getSellingPrice()%>,
+ '<%=p.getImage()%>')"></i>
+</td>
+</tr>
+<% }} else { %>
+<tr><td colspan="7" class="p-6 text-center text-gray-500">No products</td></tr>
+<% } %>
+</tbody>
+</table>
+
+</div>
+</main>
+</div>
+
+<!-- ✅ FIX: VIEW MODAL DIPINDAH KE SINI (LUAR TABLE) -->
+<div id="viewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+<div class="bg-white p-6 rounded-xl w-96">
+<h3 class="font-bold mb-4">Product View</h3>
+<img id="viewImg" class="w-full mb-3">
+<input id="viewName" disabled class="w-full mb-2">
+<input id="viewCategory" disabled class="w-full mb-2">
+<button onclick="closeViewModal()" class="bg-red-500 text-white px-4 py-2 rounded">Close</button>
+</div>
+</div>
+
+<script>
 /* ===============================
-   VIEW
+   VIEW MODAL
    =============================== */
 function openViewModal(id, name, cat, brand, qty, min, buy, sell, img) {
 
@@ -865,10 +331,11 @@ function openViewModal(id, name, cat, brand, qty, min, buy, sell, img) {
         : "<%=request.getContextPath()%>/images/default-product.png";
 
     document.getElementById("viewModal").classList.remove("hidden");
+
     loadCategoryDetails(id, cat);
 }
 
-function closeViewModal(){
+function closeViewModal() {
     document.getElementById("viewModal").classList.add("hidden");
 }
 
@@ -881,184 +348,112 @@ function loadCategoryDetails(productId, category) {
         document.getElementById("viewCategorySection").classList.add("hidden");
         document.querySelectorAll(
             "#view-cat-medicine, #view-cat-food, #view-cat-care, #view-cat-accessory"
-        ).forEach(d => d.classList.add("hidden"));
+        ).forEach(div => div.classList.add("hidden"));
 
         if (!data || Object.keys(data).length === 0) return;
 
         document.getElementById("viewCategorySection").classList.remove("hidden");
 
         if (category === "PET_MEDICINE") {
-            viewMedDosage.value = data.dosage || "-";
-            viewMedPrescription.value = data.prescription || "-";
-            viewMedExpiry.value = formatDate(data.expiry_date);
+            document.getElementById("viewMedDosage").value = data.dosage || "-";
+            document.getElementById("viewMedPrescription").value = data.prescription || "-";
+            document.getElementById("viewMedExpiry").value = formatDate(data.expiry_date);
             document.getElementById("view-cat-medicine").classList.remove("hidden");
         }
 
         if (category === "PET_FOOD") {
-            viewFoodWeight.value = data.weight || "-";
-            viewFoodExpiry.value = formatDate(data.expiry_date);
+            document.getElementById("viewFoodWeight").value = data.weight || "-";
+            document.getElementById("viewFoodExpiry").value = formatDate(data.expiry_date);
             document.getElementById("view-cat-food").classList.remove("hidden");
         }
 
         if (category === "PET_CARE") {
-            viewCareType.value = data.type || "-";
-            viewCareExpiry.value = formatDate(data.expiry_date);
+            document.getElementById("viewCareType").value = data.type || "-";
+            document.getElementById("viewCareExpiry").value = formatDate(data.expiry_date);
             document.getElementById("view-cat-care").classList.remove("hidden");
         }
 
         if (category === "PET_ACCESSORY") {
-            viewAccMaterial.value = data.material || "-";
+            document.getElementById("viewAccMaterial").value = data.material || "-";
             document.getElementById("view-cat-accessory").classList.remove("hidden");
         }
     });
 }
 
-function formatDate(d){ return d ? d.split(" ")[0] : "-"; }
+function formatDate(dateStr) {
+    return dateStr ? dateStr.split(" ")[0] : "-";
+}
 
 /* ===============================
-   EDIT
+   SEARCH & FILTER (AJAX)
    =============================== */
-function openEditModal(id, name, cat, brand, qty, min, buy, sell, img) {
-
-    editID.value = id;
-    editIDHidden.value = id;
-    editCategory.value = cat;
-    editCategoryHidden.value = cat;
-
-    editName.value = name;
-    editBrand.value = brand;
-    editQty.value = qty;
-    editMin.value = min;
-    editBuy.value = buy;
-    editSell.value = sell;
-
-    editImg.src = img
-        ? "<%=request.getContextPath()%>/product-image?file=" + img
-        : "<%=request.getContextPath()%>/images/default-product.png";
-
-    editModal.classList.remove("hidden");
-    loadCategoryDetailsEdit(id, cat);
-}
-
-function closeEditModal(){
-    editModal.classList.add("hidden");
-}
-
-function loadCategoryDetailsEdit(productId, category) {
-
-    fetch("<%=request.getContextPath()%>/product-category?productId=" + productId + "&category=" + category)
-    .then(res => res.json())
-    .then(data => {
-
-        editCategorySection.classList.add("hidden");
-        document.querySelectorAll(
-            "#edit-cat-medicine, #edit-cat-food, #edit-cat-care, #edit-cat-accessory"
-        ).forEach(d => d.classList.add("hidden"));
-
-        if (!data || Object.keys(data).length === 0) return;
-
-        editCategorySection.classList.remove("hidden");
-
-        if (category === "PET_MEDICINE") {
-            editMedDosage.value = data.dosage || "";
-            editMedPrescription.value = data.prescription || "";
-            editMedExpiry.value = toDate(data.expiry_date);
-            document.getElementById("edit-cat-medicine").classList.remove("hidden");
-        }
-
-        if (category === "PET_FOOD") {
-            editFoodWeight.value = data.weight || "";
-            editFoodExpiry.value = toDate(data.expiry_date);
-            document.getElementById("edit-cat-food").classList.remove("hidden");
-        }
-
-        if (category === "PET_CARE") {
-            editCareType.value = data.type || "";
-            editCareExpiry.value = toDate(data.expiry_date);
-            document.getElementById("edit-cat-care").classList.remove("hidden");
-        }
-
-        if (category === "PET_ACCESSORY") {
-            editAccMaterial.value = data.material || "";
-            document.getElementById("edit-cat-accessory").classList.remove("hidden");
-        }
-    });
-}
-
-function toDate(d){ return d ? d.split(" ")[0] : ""; }
-
-/* ===============================
-AUTO SEARCH + FILTER (AJAX)
-=============================== */
-
 const searchInput = document.getElementById("searchInput");
 const categoryFilter = document.getElementById("categoryFilter");
 const tableBody = document.querySelector("tbody");
 const contextPath = "<%=request.getContextPath()%>";
-
 let typingTimer;
 
 searchInput.addEventListener("input", () => {
- clearTimeout(typingTimer);
- typingTimer = setTimeout(loadProducts, 300);
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(loadProducts, 400);
 });
 
 categoryFilter.addEventListener("change", loadProducts);
 
 function loadProducts() {
 
- fetch(
-     contextPath + "/product?ajax=true"
-     + "&keyword=" + encodeURIComponent(searchInput.value || "")
-     + "&category=" + encodeURIComponent(categoryFilter.value || "")
- )
- .then(res => res.json())
- .then(data => {
+    fetch(
+        contextPath + "/product?ajax=true"
+        + "&keyword=" + encodeURIComponent(searchInput.value || "")
+        + "&category=" + encodeURIComponent(categoryFilter.value || "")
+    )
+    .then(res => res.json())
+    .then(data => {
 
-     tableBody.innerHTML = "";
+        tableBody.innerHTML = "";
 
-     if (!data || data.length === 0) {
-         tableBody.innerHTML =
-             "<tr><td colspan='7' class='text-center text-gray-500 p-4'>No product found</td></tr>";
-         paginateTable();
-         return;
-     }
+        if (!data || data.length === 0) {
+            tableBody.innerHTML =
+                "<tr><td colspan='7' class='text-center text-gray-500 p-4'>No product found</td></tr>";
+            paginateTable();
+            return;
+        }
 
-     data.forEach(p => {
+        data.forEach(p => {
 
-         const img = p.img
-             ? "<img src='" + contextPath + "/product-image?file=" + p.img + "' class='h-10 mx-auto'>"
-             : "-";
+            const imgHtml = p.img
+                ? "<img src='" + contextPath + "/product-image?file=" + p.img + "' class='h-10 mx-auto'>"
+                : "-";
 
-         tableBody.insertAdjacentHTML("beforeend",
-             "<tr>" +
-             "<td>" + img + "</td>" +
-             "<td>" + p.id + "</td>" +
-             "<td>" + p.name + "</td>" +
-             "<td>" + p.qty + "</td>" +
-             "<td>" + p.category + "</td>" +
-             "<td>RM " + Number(p.sell).toFixed(2) + "</td>" +
-             "<td class='text-center'>" +
-                 "<i class='fas fa-eye cursor-pointer mr-4' onclick=\"openViewModal('" +
-                     p.id + "','" + p.name + "','" + p.category + "','" + p.brand + "','" +
-                     p.qty + "','" + (p.min||0) + "','" + p.buy + "','" + p.sell + "','" +
-                     (p.img||"") + "')\"></i>" +
-                 "<i class='fas fa-pencil-alt cursor-pointer' onclick=\"openEditModal('" +
-                     p.id + "','" + p.name + "','" + p.category + "','" + p.brand + "','" +
-                     p.qty + "','" + (p.min||0) + "','" + p.buy + "','" + p.sell + "','" +
-                     (p.img||"") + "')\"></i>" +
-             "</td></tr>"
-         );
-     });
+            tableBody.insertAdjacentHTML("beforeend",
+                "<tr>" +
+                "<td>" + imgHtml + "</td>" +
+                "<td>" + p.id + "</td>" +
+                "<td>" + p.name + "</td>" +
+                "<td>" + p.qty + "</td>" +
+                "<td>" + p.category + "</td>" +
+                "<td>RM " + Number(p.sell).toFixed(2) + "</td>" +
+                "<td class='text-center'>" +
+                "<i class='fas fa-eye cursor-pointer mr-4' onclick=\"openViewModal('" +
+                p.id + "','" + p.name + "','" + p.category + "','" + p.brand + "','" +
+                p.qty + "','" + (p.min || 0) + "','" + p.buy + "','" + p.sell + "','" +
+                (p.img || "") + "')\"></i>" +
+                "<i class='fas fa-pencil-alt cursor-pointer' onclick=\"openEditModal('" +
+                p.id + "','" + p.name + "','" + p.category + "','" + p.brand + "','" +
+                p.qty + "','" + (p.min || 0) + "','" + p.buy + "','" + p.sell + "','" +
+                (p.img || "") + "')\"></i>" +
+                "</td></tr>"
+            );
+        });
 
-     currentPage = 1;
-     paginateTable();
- });
+        currentPage = 1;
+        paginateTable();
+    });
 }
 
-   /* ===============================
-   ADVANCED PAGINATION (MASTER)
-   =============================== */
+/* ===============================
+ADVANCED PAGINATION (LIKE DESIGN)
+=============================== */
 
 let rowsPerPage = 10;
 let currentPage = 1;
@@ -1066,114 +461,114 @@ let currentPage = 1;
 const rowsPerPageSelect = document.getElementById("rowsPerPageSelect");
 
 rowsPerPageSelect.addEventListener("change", () => {
-    rowsPerPage = Number(rowsPerPageSelect.value);
-    currentPage = 1;
-    paginateTable();
+ rowsPerPage = Number(rowsPerPageSelect.value);
+ currentPage = 1;
+ paginateTable();
 });
 
 function paginateTable() {
 
-    const rows = document.querySelectorAll("tbody tr");
-    const pagination = document.getElementById("pagination");
-    pagination.innerHTML = "";
+ const rows = document.querySelectorAll("tbody tr");
+ const pagination = document.getElementById("pagination");
+ pagination.innerHTML = "";
 
-    if (rows.length === 0) return;
+ if (rows.length === 0) return;
 
-    const totalPages = Math.ceil(rows.length / rowsPerPage);
+ const totalPages = Math.ceil(rows.length / rowsPerPage);
 
-    // hide all rows
-    rows.forEach(r => r.style.display = "none");
+ // hide all rows
+ rows.forEach(r => r.style.display = "none");
 
-    // show current page rows
-    rows.forEach((row, index) => {
-        if (
-            index >= (currentPage - 1) * rowsPerPage &&
-            index < currentPage * rowsPerPage
-        ) {
-            row.style.display = "";
-        }
-    });
+ // show current page rows
+ rows.forEach((row, index) => {
+     if (
+         index >= (currentPage - 1) * rowsPerPage &&
+         index < currentPage * rowsPerPage
+     ) {
+         row.style.display = "";
+     }
+ });
 
-    /* ===== PREV ===== */
-    const prevBtn = document.createElement("button");
-    prevBtn.innerHTML = "&#8249;";
-    prevBtn.disabled = currentPage === 1;
-    prevBtn.className =
-        "px-3 py-1 rounded-full " +
-        (prevBtn.disabled
-            ? "text-gray-400 cursor-not-allowed"
-            : "hover:bg-white");
+ /* ===== PREV BUTTON ===== */
+ const prevBtn = document.createElement("button");
+ prevBtn.innerHTML = "&#8249;";
+ prevBtn.disabled = currentPage === 1;
+ prevBtn.className =
+     "px-3 py-1 rounded-full " +
+     (prevBtn.disabled
+         ? "text-gray-400 cursor-not-allowed"
+         : "hover:bg-white");
 
-    prevBtn.onclick = () => {
-        currentPage--;
-        paginateTable();
-    };
-    pagination.appendChild(prevBtn);
+ prevBtn.onclick = () => {
+     currentPage--;
+     paginateTable();
+ };
+ pagination.appendChild(prevBtn);
 
-    /* ===== PAGE NUMBERS ===== */
-    const maxVisible = 5;
-    let start = Math.max(1, currentPage - 2);
-    let end = Math.min(totalPages, start + maxVisible - 1);
+ /* ===== PAGE NUMBERS ===== */
+ const maxVisible = 5;
+ let start = Math.max(1, currentPage - 2);
+ let end = Math.min(totalPages, start + maxVisible - 1);
 
-    if (start > 1) {
-        addPageButton(1);
-        addEllipsis();
-    }
+ if (start > 1) {
+     addPageButton(1);
+     addEllipsis();
+ }
 
-    for (let i = start; i <= end; i++) {
-        addPageButton(i);
-    }
+ for (let i = start; i <= end; i++) {
+     addPageButton(i);
+ }
 
-    if (end < totalPages) {
-        addEllipsis();
-        addPageButton(totalPages);
-    }
+ if (end < totalPages) {
+     addEllipsis();
+     addPageButton(totalPages);
+ }
 
-    /* ===== NEXT ===== */
-    const nextBtn = document.createElement("button");
-    nextBtn.innerHTML = "&#8250;";
-    nextBtn.disabled = currentPage === totalPages;
-    nextBtn.className =
-        "px-3 py-1 rounded-full " +
-        (nextBtn.disabled
-            ? "text-gray-400 cursor-not-allowed"
-            : "hover:bg-white");
+ /* ===== NEXT BUTTON ===== */
+ const nextBtn = document.createElement("button");
+ nextBtn.innerHTML = "&#8250;";
+ nextBtn.disabled = currentPage === totalPages;
+ nextBtn.className =
+     "px-3 py-1 rounded-full " +
+     (nextBtn.disabled
+         ? "text-gray-400 cursor-not-allowed"
+         : "hover:bg-white");
 
-    nextBtn.onclick = () => {
-        currentPage++;
-        paginateTable();
-    };
-    pagination.appendChild(nextBtn);
+ nextBtn.onclick = () => {
+     currentPage++;
+     paginateTable();
+ };
+ pagination.appendChild(nextBtn);
 
-    /* ===== HELPERS ===== */
-    function addPageButton(page) {
-        const btn = document.createElement("button");
-        btn.innerText = page;
-        btn.className =
-            page === currentPage
-                ? "px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 font-bold"
-                : "px-3 py-1 rounded-full hover:bg-white";
+ /* ===== HELPERS ===== */
+ function addPageButton(page) {
+     const btn = document.createElement("button");
+     btn.innerText = page;
+     btn.className =
+         page === currentPage
+             ? "px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 font-bold"
+             : "px-3 py-1 rounded-full hover:bg-white";
 
-        btn.onclick = () => {
-            currentPage = page;
-            paginateTable();
-        };
-        pagination.appendChild(btn);
-    }
+     btn.onclick = () => {
+         currentPage = page;
+         paginateTable();
+     };
+     pagination.appendChild(btn);
+ }
 
-    function addEllipsis() {
-        const span = document.createElement("span");
-        span.innerText = "...";
-        span.className = "px-2 text-gray-400";
-        pagination.appendChild(span);
-    }
+ function addEllipsis() {
+     const span = document.createElement("span");
+     span.innerText = "...";
+     span.className = "px-2 text-gray-400";
+     pagination.appendChild(span);
+ }
 }
 
 /* ===== INITIAL LOAD ===== */
-document.addEventListener("DOMContentLoaded", () => {
-    loadProducts();   // force initial AJAX load
-});
-
+document.addEventListener("DOMContentLoaded", paginateTable);
 </script>
+
 </body>
 </html>
+
+
