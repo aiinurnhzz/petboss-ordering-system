@@ -1,8 +1,8 @@
 package com.petboss.controller;
 
 import com.petboss.dao.ActivityLogDAO;
-import com.petboss.dao.ProductDAO;
 import com.petboss.dao.ProductCategoryDAO;
+import com.petboss.dao.ProductDAO;
 import com.petboss.model.Product;
 import com.petboss.service.CloudinaryService;
 import com.petboss.util.DBConnection;
@@ -51,147 +51,151 @@ public class AddProductServlet extends HttpServlet {
     /* =========================
        HANDLE FORM SUBMIT
        ========================= */
-@Override
-protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
 
-    req.setCharacterEncoding("UTF-8");
+        req.setCharacterEncoding("UTF-8");
 
-    HttpSession session = req.getSession(false);
-    if (session == null || session.getAttribute("staffId") == null) {
-        resp.sendRedirect(req.getContextPath() + "/login.jsp");
-        return;
-    }
-
-    String staffName = (String) session.getAttribute("staffName");
-    String role = (String) session.getAttribute("role");
-
-    if (role == null || !isPM(role)) {
-        resp.sendRedirect(req.getContextPath() + "/unauthorized.jsp");
-        return;
-    }
-
-    Connection con = null;
-
-    try {
-        // 🔥 TRANSACTION FOR ACTIVITY LOG ONLY
-        con = DBConnection.getConnection();
-        con.setAutoCommit(false);
-
-        ProductDAO productDAO = new ProductDAO();
-        ProductCategoryDAO categoryDAO = new ProductCategoryDAO();
-        Product p = new Product();
-
-        String category = req.getParameter("category");
-        if (category == null || category.isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/pm/addProduct?error=category");
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("staffId") == null) {
+            resp.sendRedirect(req.getContextPath() + "/login.jsp");
             return;
         }
 
-        // ===== PRODUCT ID =====
-        String productId = productDAO.generateProductId(category);
-        p.setProductId(productId);
+        String staffName = (String) session.getAttribute("staffName");
+        String role = (String) session.getAttribute("role");
 
-        // ===== BASIC INFO =====
-        p.setName(req.getParameter("productName"));
-        p.setBrand(req.getParameter("productBrand"));
-        p.setCategory(category);
-
-        // ===== STOCK =====
-        p.setQuantity(Integer.parseInt(req.getParameter("quantity")));
-        p.setMinQuantity(Integer.parseInt(req.getParameter("minQuantity")));
-
-        // ===== PRICE =====
-        p.setPurchasePrice(Double.parseDouble(req.getParameter("purchasePrice")));
-        p.setSellingPrice(Double.parseDouble(req.getParameter("sellingPrice")));
-
-        // ===== IMAGE =====
-        Part imagePart = req.getPart("productImage");
-        if (imagePart != null && imagePart.getSize() > 0) {
-            String imageUrl =
-                cloudinaryService.uploadProductImage(imagePart, productId);
-            p.setImage(imageUrl);
+        if (role == null || !isPM(role)) {
+            resp.sendRedirect(req.getContextPath() + "/unauthorized.jsp");
+            return;
         }
 
-        // ===== SAVE PRODUCT =====
-        productDAO.addProduct(p);
+        Connection con = null;
 
-        // ===== CATEGORY DETAILS =====
-        switch (category) {
+        try {
+            // ================= TRANSACTION FOR ACTIVITY LOG =================
+            con = DBConnection.getConnection();
+            con.setAutoCommit(false);
 
-            case "PET_FOOD":
-                String foodExpiryStr = req.getParameter("expiryDate_food");
-                java.sql.Date foodExpiry =
-                        (foodExpiryStr == null || foodExpiryStr.isEmpty())
-                                ? null
-                                : java.sql.Date.valueOf(foodExpiryStr);
+            ProductDAO productDAO = new ProductDAO();
+            ProductCategoryDAO categoryDAO = new ProductCategoryDAO();
+            Product p = new Product();
 
-                categoryDAO.addPetFood(
-                        productId,
-                        req.getParameter("weight"),
-                        foodExpiry
-                );
-                break;
+            String category = req.getParameter("category");
+            if (category == null || category.isEmpty()) {
+                resp.sendRedirect(req.getContextPath() + "/pm/addProduct?error=category");
+                return;
+            }
 
-            case "PET_MEDICINE":
-                String medExpiryStr = req.getParameter("expiryDate_medicine");
-                java.sql.Date medExpiry =
-                        (medExpiryStr == null || medExpiryStr.isEmpty())
-                                ? null
-                                : java.sql.Date.valueOf(medExpiryStr);
+            // ===== AUTO GENERATE PRODUCT ID =====
+            String productId = productDAO.generateProductId(category);
+            p.setProductId(productId);
 
-                categoryDAO.addPetMedicine(
-                        productId,
-                        req.getParameter("dosage"),
-                        req.getParameter("prescription"),
-                        medExpiry
-                );
-                break;
+            // ===== BASIC INFO =====
+            p.setName(req.getParameter("productName"));
+            p.setBrand(req.getParameter("productBrand"));
+            p.setCategory(category);
 
-            case "PET_CARE":
-                String careExpiryStr = req.getParameter("expiryDate_care");
-                java.sql.Date careExpiry =
-                        (careExpiryStr == null || careExpiryStr.isEmpty())
-                                ? null
-                                : java.sql.Date.valueOf(careExpiryStr);
+            // ===== STOCK =====
+            p.setQuantity(Integer.parseInt(req.getParameter("quantity")));
+            p.setMinQuantity(Integer.parseInt(req.getParameter("minQuantity")));
 
-                categoryDAO.addPetCare(
-                        productId,
-                        req.getParameter("type_care"),
-                        careExpiry
-                );
-                break;
+            // ===== PRICE =====
+            p.setPurchasePrice(Double.parseDouble(req.getParameter("purchasePrice")));
+            p.setSellingPrice(Double.parseDouble(req.getParameter("sellingPrice")));
 
-            case "PET_ACCESSORY":
-                categoryDAO.addPetAccessory(
-                        productId,
-                        req.getParameter("type_accessory"),
-                        req.getParameter("material")
-                );
-                break;
-        }
+            // ===== IMAGE (CLOUDINARY) =====
+            Part imagePart = req.getPart("productImage");
+            if (imagePart != null && imagePart.getSize() > 0) {
+                String imageUrl =
+                    cloudinaryService.uploadProductImage(imagePart, productId);
+                p.setImage(imageUrl);
+            }
 
-        // ===== ACTIVITY LOG (TRANSACTION) =====
-        ActivityLogDAO.log(
-                con,
-                staffName,
-                "added new product"
-        );
+            // ===== SAVE PRODUCT =====
+            productDAO.addProduct(p);
 
-        con.commit();
-        resp.sendRedirect(req.getContextPath() + "/product");
+            // ===== SAVE CATEGORY DETAILS =====
+            switch (category) {
 
-    } catch (Exception e) {
-        if (con != null) {
-            try { con.rollback(); } catch (Exception ignored) {}
-        }
-        throw new ServletException("Error adding product", e);
+                case "PET_FOOD":
+                    String foodExpiryStr = req.getParameter("expiryDate_food");
+                    java.sql.Date foodExpiry =
+                            (foodExpiryStr == null || foodExpiryStr.isEmpty())
+                                    ? null
+                                    : java.sql.Date.valueOf(foodExpiryStr);
 
-    } finally {
-        if (con != null) {
-            try { con.close(); } catch (Exception ignored) {}
+                    categoryDAO.addPetFood(
+                            productId,
+                            req.getParameter("weight"),
+                            foodExpiry
+                    );
+                    break;
+
+                case "PET_MEDICINE":
+                    String medExpiryStr = req.getParameter("expiryDate_medicine");
+                    java.sql.Date medExpiry =
+                            (medExpiryStr == null || medExpiryStr.isEmpty())
+                                    ? null
+                                    : java.sql.Date.valueOf(medExpiryStr);
+
+                    categoryDAO.addPetMedicine(
+                            productId,
+                            req.getParameter("dosage"),
+                            req.getParameter("prescription"),
+                            medExpiry
+                    );
+                    break;
+
+                case "PET_CARE":
+                    String careExpiryStr = req.getParameter("expiryDate_care");
+                    java.sql.Date careExpiry =
+                            (careExpiryStr == null || careExpiryStr.isEmpty())
+                                    ? null
+                                    : java.sql.Date.valueOf(careExpiryStr);
+
+                    categoryDAO.addPetCare(
+                            productId,
+                            req.getParameter("type_care"),
+                            careExpiry
+                    );
+                    break;
+
+                case "PET_ACCESSORY":
+                    categoryDAO.addPetAccessory(
+                            productId,
+                            req.getParameter("type_accessory"),
+                            req.getParameter("material")
+                    );
+                    break;
+            }
+
+            // ===== ACTIVITY LOG =====
+            ActivityLogDAO.log(
+                    con,
+                    staffName,
+                    "added new product"
+            );
+
+            con.commit();
+            resp.sendRedirect(req.getContextPath() + "/product");
+
+        } catch (Exception e) {
+            if (con != null) {
+                try { con.rollback(); } catch (Exception ignored) {}
+            }
+            throw new ServletException("Error adding product", e);
+
+        } finally {
+            if (con != null) {
+                try { con.close(); } catch (Exception ignored) {}
+            }
         }
     }
+
+    private boolean isPM(String role) {
+        return "PURCHASING_MANAGER".equalsIgnoreCase(role)
+            || "Purchasing Manager".equalsIgnoreCase(role);
+    }
 }
-
-
