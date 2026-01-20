@@ -3,21 +3,23 @@ package com.petboss.controller;
 import com.petboss.dao.ReceiveDAO;
 import com.petboss.dao.ReceiveOrderDAO;
 import com.petboss.dao.ActivityLogDAO;
+import com.petboss.util.DBConnection;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
+import java.sql.Connection;
 
 @WebServlet("/receive-product")
 public class ReceiveProductServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    // ===============================
-    // BLOCK GET (SAFETY)
-    // ===============================
+    /* ===============================
+       BLOCK GET (SAFETY)
+       =============================== */
     @Override
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response)
@@ -28,9 +30,9 @@ public class ReceiveProductServlet extends HttpServlet {
         );
     }
 
-    // ===============================
-    // HANDLE RECEIVE PRODUCT
-    // ===============================
+    /* ===============================
+       HANDLE RECEIVE PRODUCT
+       =============================== */
     @Override
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response)
@@ -52,7 +54,12 @@ public class ReceiveProductServlet extends HttpServlet {
         String qtyStr        = request.getParameter("quantityReceived");
         String invoiceNo     = request.getParameter("invoiceNo");
 
+        Connection con = null;
+
         try {
+            /* ===============================
+               BASIC VALIDATION
+               =============================== */
             if (orderDetailId == null || orderDetailId.isBlank()
              || productId == null     || productId.isBlank()
              || qtyStr == null        || qtyStr.isBlank()
@@ -68,26 +75,44 @@ public class ReceiveProductServlet extends HttpServlet {
                 throw new Exception("Quantity must be greater than 0.");
             }
 
+            /* ===============================
+               START TRANSACTION
+               =============================== */
+            con = DBConnection.getConnection();
+            con.setAutoCommit(false);
+
             ReceiveDAO dao = new ReceiveDAO();
+
             dao.receiveProduct(
-                odId, productId, qty, orderId, arrivalDate, invoiceNo
+                odId,
+                productId,
+                qty,
+                orderId,
+                arrivalDate,
+                invoiceNo
             );
 
-            // ===============================
-            // ACTIVITY LOG (AFTER SUCCESS)
-            // ===============================
+            /* ===============================
+               ACTIVITY LOG
+               =============================== */
             ActivityLogDAO.log(
+                con,
                 staffName,
-                "received product " + productName + " for order " + orderId + "."
+                "received product " + productName + " for order " + orderId
             );
+
+            con.commit(); // ✅ COMMIT ALL
 
             response.sendRedirect(
                 request.getContextPath()
                 + "/receive-order?orderId=" + orderId
             );
-            return;
 
         } catch (Exception e) {
+
+            try {
+                if (con != null) con.rollback(); // 🔥 ROLLBACK
+            } catch (Exception ignored) {}
 
             request.setAttribute("errorMessage", e.getMessage());
 
@@ -109,6 +134,12 @@ public class ReceiveProductServlet extends HttpServlet {
             request.getRequestDispatcher(
                 "/pm/receiveProductDetail.jsp"
             ).forward(request, response);
+
+        } finally {
+
+            try {
+                if (con != null) con.close();
+            } catch (Exception ignored) {}
         }
     }
 }
