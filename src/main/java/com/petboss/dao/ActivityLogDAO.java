@@ -6,19 +6,29 @@ import java.sql.PreparedStatement;
 
 public class ActivityLogDAO {
 
-    public static void log(String staffName, String action) {
-        String sql =
-            "INSERT INTO activity_log (staff_name, description) VALUES (?, ?)";
+	public static void log(String staffName, String description) {
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+	    String sql = """
+	        INSERT INTO activity_log
+	        (activity_id, staff_name, description)
+	        VALUES (ACTIVITY_LOG_SEQ.NEXTVAL, ?, ?)
+	    """;
 
-            ps.setString(1, staffName);
-            ps.setString(2, action);
-            ps.executeUpdate();
+	    try (Connection con = DBConnection.getConnection();
+	         PreparedStatement ps = con.prepareStatement(sql)) {
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+	        ps.setString(1, staffName);
+	        ps.setString(2, description);
+
+	        ps.executeUpdate();
+	        con.commit();
+
+	        System.out.println("✅ Activity log inserted");
+
+	    } catch (Exception e) {
+	        System.out.println("❌ Activity log failed");
+	        e.printStackTrace();
+	    }
+	}
+
 }
