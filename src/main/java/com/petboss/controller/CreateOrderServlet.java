@@ -138,28 +138,30 @@ public class CreateOrderServlet extends HttpServlet {
                 );
             }
 
+            // =========================
+            // ACTIVITY LOG
+            // =========================
+            ActivityLogDAO.log(
+                    con,
+                    staffName,
+                    "added new order"
+            );
+
             con.commit();
-	         // log activity selepas berjaya
-	         ActivityLogDAO.log(
-	             staffName,
-	             "added new order."
-	         );
-	
-	         response.sendRedirect(request.getContextPath() + "/order");
+            response.sendRedirect(request.getContextPath() + "/order");
 
         } catch (Exception e) {
 
-            try {
-                if (con != null) con.rollback();
-            } catch (Exception ignored) {}
-
+            if (con != null) {
+                try { con.rollback(); } catch (Exception ignored) {}
+            }
             throw new ServletException(e);
 
         } finally {
 
-            try {
-                if (con != null) con.close();
-            } catch (Exception ignored) {}
+            if (con != null) {
+                try { con.close(); } catch (Exception ignored) {}
+            }
         }
     }
 }
