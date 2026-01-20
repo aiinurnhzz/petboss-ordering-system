@@ -5,13 +5,15 @@ import com.petboss.dao.ProductCategoryDAO;
 import com.petboss.dao.ActivityLogDAO;
 import com.petboss.model.Product;
 import com.petboss.service.CloudinaryService;
+import com.petboss.util.DBConnection;
 
-import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.Date;
 
 @WebServlet("/editProduct")
@@ -24,7 +26,7 @@ public class UpdateProductServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    // ✅ Cloudinary (NO CDI)
+    // Cloudinary
     private final CloudinaryService cloudinaryService = new CloudinaryService();
 
     private Date parseDateSafe(String dateStr) {
@@ -45,45 +47,55 @@ public class UpdateProductServlet extends HttpServlet {
         }
 
         String staffName = (String) session.getAttribute("staffName");
+        Connection con = null;
 
         try {
             String productId = req.getParameter("productId");
             String category  = req.getParameter("category");
 
-            ProductDAO productDAO = new ProductDAO();
-
-            // 🔹 ambil product lama (UNTUK IMAGE)
-            Product oldProduct = productDAO.getProductById(productId);
-            if (oldProduct == null) {
-                throw new ServletException("Product not found for ID: " + productId);
+            if (productId == null || productId.isBlank()) {
+                throw new ServletException("Invalid product ID");
             }
 
-            // =========================
-            // IMAGE (CLOUDINARY UPDATE)
-            // =========================
+            /* ===============================
+               START TRANSACTION
+               =============================== */
+            con = DBConnection.getConnection();
+            con.setAutoCommit(false);
+
+            ProductDAO productDAO = new ProductDAO();
+            ProductCategoryDAO categoryDAO = new ProductCategoryDAO();
+
+            // 🔹 ambil product lama (untuk image & immutable fields)
+            Product oldProduct = productDAO.getProductById(productId);
+            if (oldProduct == null) {
+                throw new ServletException("Product not found: " + productId);
+            }
+
+            /* ===============================
+               IMAGE (CLOUDINARY)
+               =============================== */
             Part imagePart = req.getPart("productImage");
 
-            // default: guna image lama (URL Cloudinary)
-            String imageUrl = oldProduct.getImage();
+            String imageUrl = oldProduct.getImage(); // default image lama
 
-            // kalau user upload gambar baru
             if (imagePart != null && imagePart.getSize() > 0) {
                 imageUrl =
                     cloudinaryService.uploadProductImage(imagePart, productId);
             }
 
-            // =========================
-            // UPDATE PRODUCT TABLE
-            // =========================
+            /* ===============================
+               UPDATE PRODUCT (MAIN TABLE)
+               =============================== */
             Product p = new Product();
             p.setProductId(productId);
 
-            // 🔥 WAJIB SET (KEKAL SAMA)
+            // KEKAL
             p.setName(oldProduct.getName());
             p.setBrand(oldProduct.getBrand());
             p.setCategory(oldProduct.getCategory());
 
-            // UPDATE FIELD
+            // UPDATE
             p.setQuantity(Integer.parseInt(req.getParameter("quantity")));
             p.setMinQuantity(Integer.parseInt(req.getParameter("minQuantity")));
             p.setPurchasePrice(Double.parseDouble(req.getParameter("purchasePrice")));
@@ -92,11 +104,9 @@ public class UpdateProductServlet extends HttpServlet {
 
             productDAO.updateProduct(p);
 
-            // =========================
-            // UPDATE CATEGORY TABLE
-            // =========================
-            ProductCategoryDAO categoryDAO = new ProductCategoryDAO();
-
+            /* ===============================
+               UPDATE CATEGORY TABLE
+               =============================== */
             switch (category) {
 
                 case "PET_MEDICINE":
@@ -132,19 +142,33 @@ public class UpdateProductServlet extends HttpServlet {
                     break;
             }
 
-            // =========================
-            // ACTIVITY LOG
-            // =========================
+            /* ===============================
+               ACTIVITY LOG
+               =============================== */
             ActivityLogDAO.log(
+                con,
                 staffName,
-                "updated product details."
+                "updated product details"
             );
+
+            con.commit(); // ✅ COMMIT SEMUA
 
             resp.sendRedirect(req.getContextPath() + "/product");
 
         } catch (Exception e) {
+
+            try {
+                if (con != null) con.rollback(); // 🔥 ROLLBACK
+            } catch (Exception ignored) {}
+
             e.printStackTrace();
             throw new ServletException("Error updating product", e);
+
+        } finally {
+
+            try {
+                if (con != null) con.close();
+            } catch (Exception ignored) {}
         }
     }
 }
