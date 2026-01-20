@@ -71,21 +71,33 @@ public class AddSupplierServlet extends HttpServlet {
             // ✅ INSERT SUPPLIER
             boolean success = dao.addSupplier(s);
 
-            // ✅ LOG ONLY IF SUCCESS
             if (success) {
+                // ✅ ACTIVITY LOG
                 ActivityLogDAO.log(
+                    con,
                     staffName,
-                    "added new supplier."
+                    "added new supplier"
                 );
+
+                con.commit(); // ✅ COMMIT
                 session.setAttribute("toastSuccess", "Supplier added successfully");
             } else {
+                con.rollback();
                 session.setAttribute("toastError", "Failed to add supplier");
             }
 
             resp.sendRedirect(req.getContextPath() + "/supplier");
 
         } catch (Exception e) {
+            if (con != null) {
+                try { con.rollback(); } catch (Exception ignored) {}
+            }
             throw new ServletException("Error adding supplier", e);
+
+        } finally {
+            if (con != null) {
+                try { con.close(); } catch (Exception ignored) {}
+            }
         }
     }
 }
