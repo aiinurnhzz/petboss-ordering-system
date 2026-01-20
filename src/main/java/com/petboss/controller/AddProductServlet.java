@@ -188,6 +188,7 @@ public class AddProductServlet extends HttpServlet {
 
          // ===== ACTIVITY LOG (AFTER SUCCESS) =====
             ActivityLogDAO.log(
+                con,
                 staffName,
                 "added new product."
             );
@@ -207,6 +208,7 @@ public class AddProductServlet extends HttpServlet {
 
 
 }
+
 
 
 
