@@ -257,12 +257,12 @@ body {
                     <label>Status:</label>
                     <div class="radio-group">
                         <label>
-                            <input type="radio" name="status" value="ACTIVE"
+                            <input type="radio" name="status" value="Active"
                                 <%= "ACTIVE".equals(staff.getStatus()) ? "checked" : "" %>>
                             Active
                         </label>
                         <label>
-                            <input type="radio" name="status" value="INACTIVE"
+                            <input type="radio" name="status" value="Inactive"
                                 <%= "INACTIVE".equals(staff.getStatus()) ? "checked" : "" %>>
                             Resign
                         </label>
