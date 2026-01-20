@@ -256,7 +256,7 @@ public class StaffDAO {
     public void activateStaff(String staffId) throws SQLException {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
-                     "UPDATE STAFF SET STATUS='ACTIVE' WHERE STAFF_ID=?")) {
+                     "UPDATE STAFF SET STATUS='Active' WHERE STAFF_ID=?")) {
             ps.setString(1, staffId);
             ps.executeUpdate();
         }
@@ -265,7 +265,7 @@ public class StaffDAO {
     public void deactivateStaff(String staffId) throws SQLException {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
-                     "UPDATE STAFF SET STATUS='INACTIVE' WHERE STAFF_ID=?")) {
+                     "UPDATE STAFF SET STATUS='Inactive' WHERE STAFF_ID=?")) {
             ps.setString(1, staffId);
             ps.executeUpdate();
         }
@@ -340,3 +340,4 @@ public class StaffDAO {
         }
     }
 }
+
