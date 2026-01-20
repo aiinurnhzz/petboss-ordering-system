@@ -7,8 +7,7 @@ public class ActivityLogDAO {
 
     /**
      * Insert a new activity log record.
-     * This method DOES NOT manage connection or commit.
-     * Transaction is controlled by the calling servlet.
+     * Transaction is controlled by the servlet.
      */
     public static void log(Connection con, String staffName, String description)
             throws Exception {
@@ -16,7 +15,7 @@ public class ActivityLogDAO {
         String sql = """
             INSERT INTO activity_log
             (activity_id, staff_name, description)
-            VALUES (ACTIVITY_LOG_SEQ.NEXTVAL, ?, ?)
+            VALUES (nextval('activity_log_seq'), ?, ?)
         """;
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
