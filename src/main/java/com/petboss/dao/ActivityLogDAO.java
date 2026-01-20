@@ -1,6 +1,5 @@
 package com.petboss.dao;
 
-import com.petboss.util.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
@@ -22,5 +21,3 @@ public class ActivityLogDAO {
         }
     }
 }
-
-
