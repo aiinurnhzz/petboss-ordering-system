@@ -87,7 +87,7 @@ public class UpdateStaffServlet extends HttpServlet {
         // Normalize status
         String status = request.getParameter("status");
         staff.setStatus(
-            "Resign".equalsIgnoreCase(status) ? "INACTIVE" : status
+            "Resign".equalsIgnoreCase(status) ? "Inactive" : status
         );
 
         // PM ID logic
@@ -109,4 +109,5 @@ public class UpdateStaffServlet extends HttpServlet {
         }
     }
 }
+
 
