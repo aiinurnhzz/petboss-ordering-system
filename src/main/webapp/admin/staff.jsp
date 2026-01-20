@@ -222,8 +222,8 @@ td {
 
                 <select id="statusFilter" class="filter-select">
                     <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
                 </select>
 
                 <i class="fas fa-caret-down filter-arrow"></i>
@@ -313,3 +313,4 @@ statusFilter.addEventListener("change", filterStaff);
 
 </body>
 </html>
+
