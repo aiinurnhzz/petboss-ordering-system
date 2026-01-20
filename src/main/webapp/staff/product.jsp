@@ -225,12 +225,6 @@ input:disabled {
 				<!-- TITLE ROW -->
 				<div class="flex justify-between items-center mb-4">
 					<h2 class="text-3xl font-black text-cyan-900">PRODUCT</h2>
-
-					<a href="<%=request.getContextPath()%>/pm/addProduct"
-						class="bg-green-600 hover:bg-green-700
-                  text-white px-6 py-3 rounded-full font-semibold
-                  shadow-md transition">
-						+ Add Product </a>
 				</div>
 
 				<!-- DIVIDER -->
@@ -871,5 +865,6 @@ document.addEventListener("DOMContentLoaded", paginateTable);
 
 </body>
 </html>
+
 
 
