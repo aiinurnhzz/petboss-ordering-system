@@ -185,21 +185,42 @@ public class AddProductServlet extends HttpServlet {
                     );
                     break;
             }
-
-         // ===== ACTIVITY LOG (AFTER SUCCESS) =====
-            ActivityLogDAO.log(
-                con,
-                staffName,
-                "added new product."
-            );
-
-            resp.sendRedirect(req.getContextPath() + "/product");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ServletException("Error adding product", e);
-        }
-    }
+            Connection con = null;
+            
+            try {
+                con = DBConnection.getConnection();
+                con.setAutoCommit(false); // 🔥 START TRANSACTION
+            
+                ProductDAO productDAO = new ProductDAO(con);
+                ProductCategoryDAO categoryDAO = new ProductCategoryDAO(con);
+            
+                // ===== ADD PRODUCT =====
+                productDAO.addProduct(p);
+            
+                // ===== ADD CATEGORY DETAILS =====
+                categoryDAO.addPetFood(
+                    productId,
+                    req.getParameter("weight"),
+                    foodExpiry
+                );
+            
+                // ===== ACTIVITY LOG =====
+                ActivityLogDAO.log(
+                    con,
+                    staffName,
+                    "added new product"
+                );
+            
+                con.commit(); // ✅ COMMIT ALL
+                resp.sendRedirect(req.getContextPath() + "/product");
+            
+            } catch (Exception e) {
+                if (con != null) con.rollback(); // 🔥 ROLLBACK ALL
+                throw new ServletException(e);
+            
+            } finally {
+                if (con != null) con.close();
+            }
 
     private boolean isPM(String role) {
         return "PURCHASING_MANAGER".equalsIgnoreCase(role)
@@ -208,6 +229,7 @@ public class AddProductServlet extends HttpServlet {
 
 
 }
+
 
 
 
