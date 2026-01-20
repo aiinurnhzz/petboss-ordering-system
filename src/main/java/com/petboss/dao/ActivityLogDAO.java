@@ -5,6 +5,11 @@ import java.sql.PreparedStatement;
 
 public class ActivityLogDAO {
 
+    /**
+     * Insert a new activity log record.
+     * This method DOES NOT manage connection or commit.
+     * Transaction is controlled by the calling servlet.
+     */
     public static void log(Connection con, String staffName, String description)
             throws Exception {
 
